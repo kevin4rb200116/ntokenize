@@ -2,3 +2,4 @@
 *.elf
 *.so
 *.a
+.vscode/
