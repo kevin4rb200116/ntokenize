@@ -31,7 +31,7 @@ namespace tokenize {
     void dump(bool with_data);
 
     TokenInfo();
-    TokenInfo(int type, string raw_value, int start, int end, string line);
+    TokenInfo(int type, string raw_value, int start, int end, string data);
   } TokenInfo;
 
   string read_line(FILE* fp);

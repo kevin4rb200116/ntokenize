@@ -1,5 +1,5 @@
 
-PROJECT_NAME = tokenize
+PROJECT_NAME = ntokenize
 
 STATIC_LIB  = lib$(PROJECT_NAME).a
 DYNAMIC_LIB  = lib$(PROJECT_NAME).so
