@@ -7,8 +7,8 @@ DYNAMIC_LIB  = lib$(PROJECT_NAME).so
 SOURCES := $(shell find -name "*.cc" -not -name "test*" -type f)
 OBJECTS := $(addsuffix .o, $(SOURCES))
 
-TEST_SOURCES := test.cc
-TEST_OBJECTS := test.cc.o
+TEST_SOURCES := main.cc
+TEST_OBJECTS := main.cc.o
 
 COMPILER       = c++
 COMPILERFLAGS = -fPIC -O2
@@ -35,9 +35,12 @@ $(DYNAMIC_LIB): $(OBJECTS)
 	@echo "  LINK $^ -> $@"
 	@$(LINKER) $(LINKERFLAGS) -shared -o $@ $^
 
-$(PROJECT_NAME)_test.elf: $(TEST_OBJECTS) $(STATIC_LIB)
+$(PROJECT_NAME).elf: $(TEST_OBJECTS) $(STATIC_LIB)
 	@echo "  LINK $^ -> $@"
 	@$(LINKER) $(LINKERFLAGS) -o $@ $^
+
+test: $(PROJECT_NAME).elf
+	@./$(PROJECT_NAME).elf
 
 clean:
 	@rm -fv *.o

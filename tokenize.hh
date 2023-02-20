@@ -24,15 +24,23 @@ namespace tokenize {
     string raw_value;
     int start;
     int end;
-    string data;
+    string line;
 
     int exact_type();
 
-    void dump(bool with_data);
+    void dump(bool with_line);
 
     TokenInfo();
-    TokenInfo(int type, string raw_value, int start, int end, string data);
+    TokenInfo(int type, string raw_value, int start, int end, string line);
   } TokenInfo;
+
+  typedef struct Tokenizer {
+    FILE* fp;
+    TokenInfo token;
+
+    Tokenizer(FILE* fp);
+    TokenInfo next();
+  } Tokenizer;
 
   string read_line(FILE* fp);
   string read_file(FILE* fp);
@@ -67,7 +75,7 @@ namespace tokenize {
   bool PseudoExtras(TokenInfo* t);
   bool PseudoToken(TokenInfo* t);
 
-  vector<TokenInfo> File(FILE* fp);
+  TokenInfo getToken(FILE* fp);
 }
 
 #endif
