@@ -4,11 +4,9 @@ PROJECT_NAME = ntokenize
 STATIC_LIB  = lib$(PROJECT_NAME).a
 DYNAMIC_LIB  = lib$(PROJECT_NAME).so
 
-SOURCES := $(shell find -name "*.cc" -not -name "test*" -type f)
+HEADERS := $(shell find -name "*.hh" -type f)
+SOURCES := $(shell find -name "*.cc" -type f)
 OBJECTS := $(addsuffix .o, $(SOURCES))
-
-TEST_SOURCES := main.cc
-TEST_OBJECTS := main.cc.o
 
 COMPILER       = c++
 COMPILERFLAGS = -fPIC -O2
@@ -27,15 +25,15 @@ all: $(STATIC_LIB) $(DYNAMIC_LIB)
 	@echo "  COMPILE $^ -> $@"
 	@$(COMPILER) $(COMPILERFLAGS) -c -o $@ $^
 
-$(STATIC_LIB): $(OBJECTS)
+$(STATIC_LIB): tokenize.cc.o $(HEADERS)
 	@echo "  LINK $^ -> $@"
-	@$(ARCHIVER) $(ARCHIVERFLAGS) mcs $@ $^
+	@$(ARCHIVER) $(ARCHIVERFLAGS) mcs $@ $<
 
-$(DYNAMIC_LIB): $(OBJECTS)
+$(DYNAMIC_LIB): tokenize.cc.o $(HEADERS)
 	@echo "  LINK $^ -> $@"
-	@$(LINKER) $(LINKERFLAGS) -shared -o $@ $^
+	@$(LINKER) $(LINKERFLAGS) -shared -o $@ $<
 
-$(PROJECT_NAME).elf: $(TEST_OBJECTS) $(STATIC_LIB)
+$(PROJECT_NAME).elf: main.cc.o $(STATIC_LIB)
 	@echo "  LINK $^ -> $@"
 	@$(LINKER) $(LINKERFLAGS) -o $@ $^
 

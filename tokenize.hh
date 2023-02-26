@@ -20,26 +20,34 @@ namespace tokenize {
   using namespace std;
 
   typedef struct TokenInfo {
-    int type;
+    int type, start, end;
     string raw_value;
-    int start;
-    int end;
-    string line;
+    string* line;
 
     int exact_type();
+    void from(TokenInfo* t);
 
     void dump(bool with_line);
 
-    TokenInfo();
-    TokenInfo(int type, string raw_value, int start, int end, string line);
+  TokenInfo()
+    : type(0), raw_value(string()), start(0), end(0), line(nullptr) {}
+
+  TokenInfo(int type, string raw_value, int start, int end, string* line)
+    : type(type), raw_value(raw_value), start(start), end(end), line(line) {}
   } TokenInfo;
 
   typedef struct Tokenizer {
     FILE* fp;
-    TokenInfo token;
+    string line;
+    TokenInfo last,current;
 
-    Tokenizer(FILE* fp);
-    TokenInfo next();
+    TokenInfo* next();
+
+    Tokenizer(FILE* fp)
+      : fp(fp), line(string()) {
+      current.line = &line;
+    }
+
   } Tokenizer;
 
   string read_line(FILE* fp);
@@ -74,8 +82,6 @@ namespace tokenize {
   bool Token(TokenInfo* t);
   bool PseudoExtras(TokenInfo* t);
   bool PseudoToken(TokenInfo* t);
-
-  TokenInfo getToken(FILE* fp);
 }
 
 #endif

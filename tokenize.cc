@@ -263,7 +263,7 @@ namespace tokenize {
         "raw_value: \"%s\", "
         "start: %i, "
         "end: %i, "
-        "data: \"%s\" }\n";
+        "line: \"%s\" }\n";
     else
       format =
         "%s { type: %i, "
@@ -277,19 +277,20 @@ namespace tokenize {
       raw_value.c_str(),
       start,
       end,
-      line.c_str()
+      line->c_str()
     );
   }
 
-  TokenInfo::TokenInfo(int type, string raw_value, int start, int end, string line)
-      :type(type), raw_value(raw_value), start(start), end(end), line(line) {}
+  void TokenInfo::from(TokenInfo* t) {
+    type = t->type;
 
-  TokenInfo::TokenInfo() {
-    type=0;
-    raw_value=string();
-    start=0;
-    end=0;
-    line=string();
+    raw_value.clear();
+    raw_value.append(t->raw_value);
+
+    start = t->start;
+    end = t->end;
+
+    line = t->line;
   }
 
   string read_file(FILE* fp) {
@@ -328,7 +329,7 @@ namespace tokenize {
 
     t->type = lex::token["TYPE_IGNORE"];
 
-    switch (t->line[t->end]) {
+    switch ((*t->line)[t->end]) {
       case ' ':
       case '\f':
       case '\t':
@@ -341,8 +342,8 @@ namespace tokenize {
         return false;
     }
 
-    for (t->end; t->end <= t->line.length(); t->end++) {
-      switch (t->line[t->end]) {
+    for (t->end; t->end <= t->line->length(); t->end++) {
+      switch ((*t->line)[t->end]) {
         case ' ':
         case '\f':
         case '\t':
@@ -356,7 +357,7 @@ namespace tokenize {
     }
 
     t->start = b;
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     return true;
@@ -368,14 +369,14 @@ namespace tokenize {
     t->start = t->end;
     t->type = lex::token["COMMENT"];
 
-    if (t->line[t->end] != '#') {
+    if ((*t->line)[t->end] != '#') {
       t->type = lex::token["ERRORTOKEN"];
       t->end = b;
       return false;
     }
 
-    for (t->end; t->end <= t->line.length(); t->end++) {
-      switch (t->line[t->end]) {
+    for (t->end; t->end <= t->line->length(); t->end++) {
+      switch ((*t->line)[t->end]) {
         case '\r':
         case '\n':
           break;
@@ -387,7 +388,7 @@ namespace tokenize {
       break;
     }
 
-    switch (t->line[t->end]) {
+    switch ((*t->line)[t->end]) {
       case '\r':
       case '\n':
         break;
@@ -398,10 +399,10 @@ namespace tokenize {
         return false;
     }
 
-    //t->end = t->line.length();
+    //t->end = t->line->length();
 
     t->start = b;
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     t->type = lex::token["COMMENT"];
@@ -437,8 +438,8 @@ namespace tokenize {
     t->start = t->end;
     t->type = lex::token["NAME"];
 
-    if (!isalpha(t->line[t->end])) {
-      if (t->line[t->end] != '_') {
+    if (!isalpha((*t->line)[t->end])) {
+      if ((*t->line)[t->end] != '_') {
         t->type = lex::token["ERRORTOKEN"];
         t->end = b;
         return false;
@@ -447,17 +448,17 @@ namespace tokenize {
 
     t->end++;
 
-    for (t->end; t->end <= t->line.length(); t->end++) {
-      if (isalnum(t->line[t->end]))
+    for (t->end; t->end <= t->line->length(); t->end++) {
+      if (isalnum((*t->line)[t->end]))
         continue;
 
-      if (t->line[t->end] == '_')
+      if ((*t->line)[t->end] == '_')
         continue;
 
       break;
     }
 
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     if (t->raw_value.length() == 0) {
@@ -475,11 +476,11 @@ namespace tokenize {
     t->start = t->end;
     t->type = lex::token["NUMBER"];
 
-    switch (t->line[t->end]) {
+    switch ((*t->line)[t->end]) {
       case '0':
         t->end++;
 
-        switch (t->line[t->end]) {
+        switch ((*t->line)[t->end]) {
           case 'x':
           case 'X':
             t->end += 2;
@@ -499,23 +500,23 @@ namespace tokenize {
         return false;
     }
 
-    for (t->end; t->line.length() > t->end; t->end++) {
-      if (t->line[t->end] >= '0')
-        if (t->line[t->end] <= '9')
+    for (t->end; t->line->length() > t->end; t->end++) {
+      if ((*t->line)[t->end] >= '0')
+        if ((*t->line)[t->end] <= '9')
           continue;
 
-      if (t->line[t->end] >= 'a')
-        if (t->line[t->end] <= 'f')
+      if ((*t->line)[t->end] >= 'a')
+        if ((*t->line)[t->end] <= 'f')
           continue;
 
-      if (t->line[t->end] >= 'A')
-        if (t->line[t->end] <= 'F')
+      if ((*t->line)[t->end] >= 'A')
+        if ((*t->line)[t->end] <= 'F')
           continue;
 
       break;
     }
 
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     if (t->raw_value.length() < 3) {
@@ -533,11 +534,11 @@ namespace tokenize {
     t->start = t->end;
     t->type = lex::token["NUMBER"];
 
-    switch (t->line[t->end]) {
+    switch ((*t->line)[t->end]) {
       case '0':
         t->end++;
 
-        switch (t->line[t->end]) {
+        switch ((*t->line)[t->end]) {
           case 'b':
           case 'B':
             t->end += 2;
@@ -557,17 +558,17 @@ namespace tokenize {
         return false;
     }
 
-    for (t->end; t->line.length() > t->end; t->end++) {
-      if (t->line[t->end] == '0')
+    for (t->end; t->line->length() > t->end; t->end++) {
+      if ((*t->line)[t->end] == '0')
         continue;
 
-      if (t->line[t->end] == '1')
+      if ((*t->line)[t->end] == '1')
         continue;
 
       break;
     }
 
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     if (t->raw_value.length() < 3) {
@@ -585,11 +586,11 @@ namespace tokenize {
     t->start = t->end;
     t->type = lex::token["NUMBER"];
 
-    switch (t->line[t->end]) {
+    switch ((*t->line)[t->end]) {
       case '0':
         t->end++;
 
-        switch (t->line[t->end]) {
+        switch ((*t->line)[t->end]) {
           case 'o':
           case 'O':
             t->end += 2;
@@ -609,15 +610,15 @@ namespace tokenize {
         return false;
     }
 
-    for (t->end; t->line.length() > t->end; t->end++) {
-      if (t->line[t->end] >= '0')
-        if (t->line[t->end] <= '7')
+    for (t->end; t->line->length() > t->end; t->end++) {
+      if ((*t->line)[t->end] >= '0')
+        if ((*t->line)[t->end] <= '7')
           continue;
 
       break;
     }
 
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     if (t->raw_value.length() < 3) {
@@ -635,23 +636,23 @@ namespace tokenize {
     t->start = t->end;
     t->type = lex::token["NUMBER"];
 
-    if (!(t->line[t->end] >= '0')) {
-      if (!(t->line[t->end] <= '9')) {
+    if (!((*t->line)[t->end] >= '0')) {
+      if (!((*t->line)[t->end] <= '9')) {
         t->type = lex::token["ERRORTOKEN"];
         t->end = b;
         return false;
       }
     }
 
-    for (t->end; t->line.length() > t->end; t->end++) {
-      if (t->line[t->end] >= '0')
-        if (t->line[t->end] <= '9')
+    for (t->end; t->line->length() > t->end; t->end++) {
+      if ((*t->line)[t->end] >= '0')
+        if ((*t->line)[t->end] <= '9')
           continue;
 
       break;
     }
 
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     if (t->raw_value.length() == 0) {
@@ -702,12 +703,12 @@ namespace tokenize {
     t->start = t->end;
     t->type = lex::token["NUMBER"];
 
-    switch (t->line[t->end]) {
+    switch ((*t->line)[t->end]) {
       case 'e':
       case 'E':
         t->end++;
 
-        switch (t->line[t->end]) {
+        switch ((*t->line)[t->end]) {
           case '-':
           case '+':
             t->end++;
@@ -731,7 +732,7 @@ namespace tokenize {
     t->end++;
     t->start = b;
 
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     return true;
@@ -746,7 +747,7 @@ namespace tokenize {
       t->end++;
     }
 
-    if (t->line[t->end] != '.') {
+    if ((*t->line)[t->end] != '.') {
       t->type = lex::token["ERRORTOKEN"];
       t->end = b;
       return false;
@@ -768,7 +769,7 @@ namespace tokenize {
     t->type = lex::token["NUMBER"];
     t->start=b;
 
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     return true;
@@ -797,7 +798,7 @@ namespace tokenize {
     t->end++;
     t->start=b;
 
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     return true;
@@ -840,7 +841,7 @@ namespace tokenize {
 
     t->end++;
 
-    switch (t->line[t->end]) {
+    switch ((*t->line)[t->end]) {
       case 'j':
       case 'J':
         t->end++;
@@ -853,7 +854,7 @@ namespace tokenize {
     }
 
     t->start = b;
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     return true;
@@ -888,7 +889,7 @@ namespace tokenize {
     int b = t->end;
     t->start = t->end;
 
-    switch (t->line[t->end]) {
+    switch ((*t->line)[t->end]) {
       case 'u':
       case 'U':
         break;
@@ -897,7 +898,7 @@ namespace tokenize {
       case 'B':
         t->end++;
 
-        switch (t->line[t->end]) {
+        switch ((*t->line)[t->end]) {
           case 'r':
           case 'R':
             t->end++;
@@ -913,7 +914,7 @@ namespace tokenize {
       case 'F':
         t->end++;
 
-        switch (t->line[t->end]) {
+        switch ((*t->line)[t->end]) {
           case 'r':
           case 'R':
             t->end++;
@@ -929,7 +930,7 @@ namespace tokenize {
       case 'R':
         t->end++;
 
-        switch (t->line[t->end]) {
+        switch ((*t->line)[t->end]) {
           case 'b':
           case 'B':
             t->end++;
@@ -976,7 +977,7 @@ namespace tokenize {
 
     t->type = lex::token["STRING"];
 
-    switch (t->line[t->end]) {
+    switch ((*t->line)[t->end]) {
       case '\'':
         t->end++;
         break;
@@ -987,15 +988,15 @@ namespace tokenize {
         return false;
     }
 
-    for (t->end; t->line.length() > t->end; t->end++) {
-      if (t->line[t->end] == '\\')
+    for (t->end; t->line->length() > t->end; t->end++) {
+      if ((*t->line)[t->end] == '\\')
         t->end += 2;
 
-      if (t->line[t->end] == '\'')
+      if ((*t->line)[t->end] == '\'')
         break;
     }
 
-    switch (t->line[t->end]) {
+    switch ((*t->line)[t->end]) {
       case '\'':
         t->end++;
         break;
@@ -1007,7 +1008,7 @@ namespace tokenize {
     }
 
     t->start = b;
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     return true;
@@ -1020,7 +1021,7 @@ namespace tokenize {
 
     t->type = lex::token["STRING"];
 
-    switch (t->line[t->end]) {
+    switch ((*t->line)[t->end]) {
       case '"':
         t->end++;
         break;
@@ -1031,15 +1032,15 @@ namespace tokenize {
         return false;
     }
 
-    for (t->end; t->line.length() > t->end; t->end++) {
-      if (t->line[t->end] == '\\')
+    for (t->end; t->line->length() > t->end; t->end++) {
+      if ((*t->line)[t->end] == '\\')
         t->end += 2;
 
-      if (t->line[t->end] == '"')
+      if ((*t->line)[t->end] == '"')
         break;
     }
 
-    switch (t->line[t->end]) {
+    switch ((*t->line)[t->end]) {
       case '"':
         t->end++;
         break;
@@ -1051,7 +1052,7 @@ namespace tokenize {
     }
 
     t->start = b;
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     return true;
@@ -1064,9 +1065,9 @@ namespace tokenize {
 
     t->type = lex::token["STRING"];
 
-    if (t->line[t->end] != '\'') {
-      if (t->line[t->end+1] != '\'') {
-        if (t->line[t->end+2] != '\'') {
+    if ((*t->line)[t->end] != '\'') {
+      if ((*t->line)[t->end+1] != '\'') {
+        if ((*t->line)[t->end+2] != '\'') {
           t->type = lex::token["ERRORTOKEN"];
           t->end = b;
           return false;
@@ -1076,19 +1077,19 @@ namespace tokenize {
 
     t->end += 3;
 
-    for (t->end; t->line.length() > t->end; t->end++) {
-      if (t->line[t->end] == '\\')
+    for (t->end; t->line->length() > t->end; t->end++) {
+      if ((*t->line)[t->end] == '\\')
         t->end += 2;
 
-      if (t->line[t->end] == '\'')
-        if (t->line[t->end+1] == '\'')
-          if (t->line[t->end+2] == '\'')
+      if ((*t->line)[t->end] == '\'')
+        if ((*t->line)[t->end+1] == '\'')
+          if ((*t->line)[t->end+2] == '\'')
             break;
     }
 
-    if (t->line[t->end] != '\'') {
-      if (t->line[t->end+1] != '\'') {
-        if (t->line[t->end+2] != '\'') {
+    if ((*t->line)[t->end] != '\'') {
+      if ((*t->line)[t->end+1] != '\'') {
+        if ((*t->line)[t->end+2] != '\'') {
           t->type = lex::token["ERRORTOKEN"];
           t->end = b;
           return false;
@@ -1099,7 +1100,7 @@ namespace tokenize {
     t->end += 3;
 
     t->start = b;
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     if (t->raw_value.length() < 6) {
@@ -1118,9 +1119,9 @@ namespace tokenize {
 
     t->type = lex::token["STRING"];
 
-    if (t->line[t->end] != '"') {
-      if (t->line[t->end+1] != '"') {
-        if (t->line[t->end+2] != '"') {
+    if ((*t->line)[t->end] != '"') {
+      if ((*t->line)[t->end+1] != '"') {
+        if ((*t->line)[t->end+2] != '"') {
           t->type = lex::token["ERRORTOKEN"];
           t->end = b;
           return false;
@@ -1130,19 +1131,19 @@ namespace tokenize {
 
     t->end += 3;
 
-    for (t->end; t->line.length() > t->end; t->end++) {
-      if (t->line[t->end] == '\\')
+    for (t->end; t->line->length() > t->end; t->end++) {
+      if ((*t->line)[t->end] == '\\')
         t->end += 2;
 
-      if (t->line[t->end] == '"')
-        if (t->line[t->end+1] == '"')
-          if (t->line[t->end+2] == '"')
+      if ((*t->line)[t->end] == '"')
+        if ((*t->line)[t->end+1] == '"')
+          if ((*t->line)[t->end+2] == '"')
             break;
     }
 
-    if (t->line[t->end] != '"') {
-      if (t->line[t->end+1] != '"') {
-        if (t->line[t->end+2] != '"') {
+    if ((*t->line)[t->end] != '"') {
+      if ((*t->line)[t->end+1] != '"') {
+        if ((*t->line)[t->end+2] != '"') {
           t->type = lex::token["ERRORTOKEN"];
           t->end = b;
           return false;
@@ -1153,7 +1154,7 @@ namespace tokenize {
     t->end += 3;
 
     t->start = b;
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     if (t->raw_value.length() < 6) {
@@ -1176,7 +1177,7 @@ namespace tokenize {
     if (Single3(t)) {
       t->end++;
       t->start = b;
-      t->raw_value = t->line.substr(t->start,t->end-t->start);
+      t->raw_value = t->line->substr(t->start,t->end-t->start);
       t->end--;
 
       return true;
@@ -1185,7 +1186,7 @@ namespace tokenize {
     if (Double3(t)) {
       t->end++;
       t->start = b;
-      t->raw_value = t->line.substr(t->start,t->end-t->start);
+      t->raw_value = t->line->substr(t->start,t->end-t->start);
       t->end--;
 
       return true;
@@ -1207,7 +1208,7 @@ namespace tokenize {
       t->end++;
 
       t->start = b;
-      t->raw_value = t->line.substr(t->start,t->end-t->start);
+      t->raw_value = t->line->substr(t->start,t->end-t->start);
       t->end--;
 
       return true;
@@ -1217,7 +1218,7 @@ namespace tokenize {
       t->end++;
 
       t->start = b;
-      t->raw_value = t->line.substr(t->start,t->end-t->start);
+      t->raw_value = t->line->substr(t->start,t->end-t->start);
       t->end--;
 
       return true;
@@ -1245,7 +1246,7 @@ namespace tokenize {
     t->end++;
 
     t->start = b;
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     return true;
@@ -1259,8 +1260,8 @@ namespace tokenize {
 
     for (int i=3; i >= 0; i--) {
       for (auto _operator : lex::_operator) {
-        if (_operator.second == t->line.substr(t->end,i)) {
-          t->raw_value = t->line.substr(b,i);
+        if (_operator.second == t->line->substr(t->end,i)) {
+          t->raw_value = t->line->substr(b,i);
           t->end = (b+i)-1;
 
           return true;
@@ -1286,17 +1287,17 @@ namespace tokenize {
 
     t->type = lex::token["NL"];
 
-    if (t->line[t->end] == '\r')
+    if ((*t->line)[t->end] == '\r')
       t->end++;
 
-    if (!(t->line[t->end] == '\n')) {
+    if (!((*t->line)[t->end] == '\n')) {
       t->type = lex::token["ERRORTOKEN"];
       t->end = b;
       return false;
     }
 
     t->end++;
-    t->raw_value = t->line.substr(t->start,t->end-t->start);
+    t->raw_value = t->line->substr(t->start,t->end-t->start);
     t->end--;
 
     return true;
@@ -1394,30 +1395,36 @@ namespace tokenize {
     return false;
   }
 
-  Tokenizer::Tokenizer(FILE* fp) : fp(fp) {
-    token = TokenInfo();
-  }
+  TokenInfo* Tokenizer::next() {
+    if (current.end != 0)
+      current.end++;
 
-  TokenInfo Tokenizer::next() {
-    if (token.end != 0)
-      token.end++;
-
-    if (token.end == token.line.length()) {
-      token = TokenInfo();
+    if (current.end == current.line->length()) {
+      current.type = 0;
+      current.raw_value.clear();
+      current.start = 0;
+      current.end = 0;
+      current.line->clear();
     }
 
-    if (token.line.empty()) {
-      token.line = read_line(fp);
+    if (current.line->empty()) {
+      current.line->clear();
+      current.line->append(read_line(fp));
 
-      if (token.line.empty()) {
-        token.type = lex::token["ENDMARKER"];
-        token.dump(false);
-        return TokenInfo(token);
+      if (current.line->empty()) {
+        current.type = lex::token["ENDMARKER"];
+
+        current.dump(false);
+
+        return &current;
       }
     }
 
-    tokenize::PseudoToken(&token);
+    PseudoToken(&current);
+    last.from(&current);
 
-    return TokenInfo(token);
+    last.dump(false);
+
+    return &last;
   }
 }
