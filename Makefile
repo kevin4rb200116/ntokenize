@@ -8,14 +8,7 @@ HEADERS := $(shell find -name "*.hh" -type f)
 SOURCES := $(shell find -name "*.cc" -type f)
 OBJECTS := $(addsuffix .o, $(SOURCES))
 
-COMPILER       = c++
-COMPILERFLAGS = -fPIC -O2
-
-LINKER         = c++
-LINKERFLAGS    = 
-
-ARCHIVER = ar
-ARCHIVERFLAGS = 
+CXXFLAGS := -pipe -O2 -fPIC
 
 PROGRAM = main
 
@@ -23,19 +16,19 @@ all: $(STATIC_LIB) $(DYNAMIC_LIB)
 
 %.cc.o: %.cc
 	@echo "  COMPILE $^ -> $@"
-	@$(COMPILER) $(COMPILERFLAGS) -c -o $@ $^
+	@$(CXX) -c $(CXXFLAGS) -o $@ $^
 
 $(STATIC_LIB): tokenize.cc.o $(HEADERS)
 	@echo "  LINK $^ -> $@"
-	@$(ARCHIVER) $(ARCHIVERFLAGS) mcs $@ $<
+	@$(AR) mcs $@ $<
 
 $(DYNAMIC_LIB): tokenize.cc.o $(HEADERS)
 	@echo "  LINK $^ -> $@"
-	@$(LINKER) $(LINKERFLAGS) -shared -o $@ $<
+	@$(CXX) $(CXXFLAGS) -shared -o $@ $<
 
 $(PROJECT_NAME).elf: main.cc.o $(STATIC_LIB)
 	@echo "  LINK $^ -> $@"
-	@$(LINKER) $(LINKERFLAGS) -o $@ $^
+	@$(CXX) $(CXXFLAGS) -o $@ $^
 
 test: $(PROJECT_NAME).elf
 	@./$(PROJECT_NAME).elf
