@@ -1414,16 +1414,12 @@ namespace tokenize {
       if (current.line->empty()) {
         current.type = lex::token["ENDMARKER"];
 
-        current.dump(false);
-
         return &current;
       }
     }
 
     PseudoToken(&current);
     last.from(&current);
-
-    last.dump(false);
 
     return &last;
   }
