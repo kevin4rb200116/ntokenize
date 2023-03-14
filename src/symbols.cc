@@ -1,6 +1,6 @@
-#include "tokenize.hh"
+#include "ntokenize/tokenize.hh"
 
-namespace tokenize {
+namespace ntokenize {
   inline Rule(Paren) {
     switch (((*t->line)[t->end])) {
       case '(':

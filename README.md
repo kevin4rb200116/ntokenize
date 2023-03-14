@@ -1,7 +1,7 @@
-# ntokenize
+# a simple tokenizer (or lexer)
 
-a simple little tokenizer, based on the python lib2to3
-library tokenizer
+a simple little tokenizer (or lexer), based on the tokenize python
+built-in module
 
 ## Installing from Source
 

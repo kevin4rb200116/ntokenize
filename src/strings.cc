@@ -1,6 +1,6 @@
-#include "tokenize.hh"
+#include "ntokenize/tokenize.hh"
 
-namespace tokenize {
+namespace ntokenize {
   // (|RB|u|Rb|Br|b|fr|r|Rf|br|fR|Fr|R|f|rb|FR|BR|rf|bR|rB|B|F|rF|RF|U)
   Rule(StringPrefix) {
     int b = t->end;

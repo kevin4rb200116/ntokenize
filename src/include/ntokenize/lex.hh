@@ -3,7 +3,7 @@
 #ifndef LexHeader
 #define LexHeader
 
-namespace lex {
+namespace ntokenize::lex {
   using namespace std;
 
   typedef map<string,int> TokenList;

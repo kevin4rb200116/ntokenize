@@ -6,7 +6,7 @@
 
 #define Rule(name) bool name(TokenInfo* t)
 
-namespace tokenize {
+namespace ntokenize {
   using namespace std;
 
   typedef struct TokenInfo {

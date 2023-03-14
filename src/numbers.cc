@@ -1,6 +1,6 @@
-#include "tokenize.hh"
+#include "ntokenize/tokenize.hh"
 
-namespace tokenize {
+namespace ntokenize {
   // "0[xX](?:_?[0-9a-fA-F])+"
   Rule(HexNumber) {
     int b = t->end;

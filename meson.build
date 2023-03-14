@@ -5,9 +5,9 @@ project('ntokenize', 'cpp',
 incdir = include_directories('src/include')
 
 install_headers(
-  'src/include/common.hh',
-  'src/include/lex.hh',
-  'src/include/tokenize.hh',
+  'src/include/ntokenize/common.hh',
+  'src/include/ntokenize/lex.hh',
+  'src/include/ntokenize/tokenize.hh',
   install_dir: 'include/ntokenize')
 
 lib = library('ntokenize',

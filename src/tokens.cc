@@ -1,6 +1,6 @@
-#include "tokenize.hh"
+#include "ntokenize/tokenize.hh"
 
-namespace tokenize {
+namespace ntokenize {
   // "[ \f\t]*"
   Rule(Whitespace) {
     int b=t->end;

@@ -1,7 +1,7 @@
-#include "tokenize.hh"
+#include "ntokenize/tokenize.hh"
 #include <memory>
 
-using tokenize::Tokenizer;
+using namespace ntokenize;
 
 int main(int argc, char** argv, char** environ) {
   Tokenizer tokenize = Tokenizer(stdin);

@@ -1,6 +1,6 @@
-#include "lex.hh"
+#include "ntokenize/lex.hh"
 
-namespace lex {
+namespace ntokenize::lex {
   TokenNameList token_name = {
     {0, "ENDMARKER"},
     {1, "NAME"},

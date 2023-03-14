@@ -1,6 +1,6 @@
-#include "tokenize.hh"
+#include "ntokenize/tokenize.hh"
 
-namespace tokenize {
+namespace ntokenize {
   int TokenInfo::exact_type() {
     bool have_op=false;
 
