@@ -100,9 +100,6 @@ namespace ntokenize {
 
       if (current.line->empty()) {
         current.type = lex::token["ENDMARKER"];
-
-        current.dump(false);
-
         return &current;
       }
     }
