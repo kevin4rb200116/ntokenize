@@ -24,3 +24,6 @@ lib = library('ntokenize',
 bin = executable('ntokenize', 'src/main.cc', link_with: lib,
   include_directories: incdir,
   install : true)
+
+ntokenize_dep = declare_dependency(include_directories : incdir,
+  link_with : lib)
