@@ -9,7 +9,7 @@ install_headers(
   'src/include/lex.hh',
   'src/include/tokenize.hh',
   install_dir: 'include/ntokenize')
-  
+
 lib = library('ntokenize',
   'src/tokenize.cc',
   'src/tokens.cc',
@@ -18,7 +18,7 @@ lib = library('ntokenize',
   'src/numbers.cc',
   'src/lex.cc',
   include_directories: incdir,
-  version: '0.1', # same as project obviously
+  version: '0.2', # same as project obviously
   install : true)
 
 bin = executable('ntokenize', 'src/main.cc', link_with: lib,
