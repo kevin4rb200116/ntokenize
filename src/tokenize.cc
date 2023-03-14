@@ -114,8 +114,6 @@ namespace tokenize {
     if (current.end == 0)
       current.end++;
 
-    last.dump(false);
-
     return &last;
   }
 }
