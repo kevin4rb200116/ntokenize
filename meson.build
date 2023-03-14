@@ -1,12 +1,25 @@
 project('ntokenize', 'cpp',
-  version : '0.1',
-  default_options : ['warning_level=3',
-                     'cpp_std=c++14'])
+  version : '0.2',
+  default_options : ['cpp_std=c++17'])
 
 incdir = include_directories('src/include')
 
-lib = library('ntokenize', 'src/tokenize.cc',
-  include_directories: incdir)
+install_headers(
+  'src/include/common.hh',
+  'src/include/lex.hh',
+  'src/include/tokenize.hh',
+  install_dir: 'include/ntokenize')
+  
+lib = library('ntokenize',
+  'src/tokenize.cc',
+  'src/tokens.cc',
+  'src/symbols.cc',
+  'src/strings.cc',
+  'src/numbers.cc',
+  'src/lex.cc',
+  include_directories: incdir,
+  version: '0.1', # same as project obviously
+  install : true)
 
 bin = executable('ntokenize', 'src/main.cc', link_with: lib,
   include_directories: incdir,

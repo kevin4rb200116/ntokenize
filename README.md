@@ -41,7 +41,7 @@ _Installing (Local):_
 
 ```sh
 # on building
-meson --buildtype release --prefix </path/to/installdir> ./release
+meson --buildtype release --default-library static --prefix </path/to/installdir> ./release
 ninja -C release
 ninja -C release install
 ```

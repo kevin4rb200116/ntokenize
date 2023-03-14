@@ -1,20 +1,10 @@
 #include "common.hh"
+#include "lex.hh"
 
 #ifndef TokenizeHeader
 #define TokenizeHeader
 
-namespace lex {
-  using namespace std;
-
-  typedef map<string,int> TokenList;
-  typedef map<int,string> TokenNameList;
-  typedef map<string,string> OperatorList;
-
-  extern TokenNameList token_name;
-  extern OperatorList _operator;
-  extern TokenList token;
-  extern TokenList EXACT_TOKEN_TYPE;
-}
+#define Rule(name) bool name(TokenInfo* t)
 
 namespace tokenize {
   using namespace std;
@@ -29,11 +19,11 @@ namespace tokenize {
 
     void dump(bool with_line);
 
-  TokenInfo()
-    : type(0), raw_value(string()), start(0), end(0), line(nullptr) {}
+    TokenInfo()
+      : type(0), raw_value(string()), start(0), end(0), line(nullptr) {}
 
-  TokenInfo(int type, string raw_value, int start, int end, string* line)
-    : type(type), raw_value(raw_value), start(start), end(end), line(line) {}
+    TokenInfo(int type, string raw_value, int start, int end, string* line)
+      : type(type), raw_value(raw_value), start(start), end(end), line(line) {}
   } TokenInfo;
 
   typedef struct Tokenizer {
@@ -53,35 +43,35 @@ namespace tokenize {
   string read_line(FILE* fp);
   string read_file(FILE* fp);
 
-  bool Whitespace(TokenInfo* i);
-  bool Comment(TokenInfo* t);
-  bool Ignore(TokenInfo* t);
-  bool Name(TokenInfo* t);
-  bool HexNumber(TokenInfo* t);
-  bool Binnumber(TokenInfo* t);
-  bool Octnumber(TokenInfo* t);
-  bool Decnumber(TokenInfo* t);
-  bool Intnumber(TokenInfo* t);
-  bool Exponent(TokenInfo* t);
-  bool Pointfloat(TokenInfo* t);
-  bool Expfloat(TokenInfo* t);
-  bool Floatnumber(TokenInfo* t);
-  bool Imagnumber(TokenInfo* t);
-  bool Number(TokenInfo* t);
-  bool StringPrefix(TokenInfo* t);
-  bool Single(TokenInfo* t);
-  bool Double(TokenInfo* t);
-  bool Single3(TokenInfo* t);
-  bool Double3(TokenInfo* t);
-  bool Triple(TokenInfo* t);
-  bool String(TokenInfo* t);
-  bool ContStr(TokenInfo* t);
-  bool Special(TokenInfo* t);
-  bool Funny(TokenInfo* t);
-  bool PlainToken(TokenInfo* t);
-  bool Token(TokenInfo* t);
-  bool PseudoExtras(TokenInfo* t);
-  bool PseudoToken(TokenInfo* t);
+  Rule(Whitespace);
+  Rule(Comment);
+  Rule(Ignore);
+  Rule(Name);
+  Rule(HexNumber);
+  Rule(Binnumber);
+  Rule(Octnumber);
+  Rule(Decnumber);
+  Rule(Intnumber);
+  Rule(Exponent);
+  Rule(Pointfloat);
+  Rule(Expfloat);
+  Rule(Floatnumber);
+  Rule(Imagnumber);
+  Rule(Number);
+  Rule(StringPrefix);
+  Rule(Single);
+  Rule(Double);
+  Rule(Single3);
+  Rule(Double3);
+  Rule(Triple);
+  Rule(String);
+  Rule(ContStr);
+  Rule(Special);
+  Rule(Funny);
+  Rule(PlainToken);
+  Rule(Token);
+  Rule(PseudoExtras);
+  Rule(PseudoToken);
 }
 
 #endif
