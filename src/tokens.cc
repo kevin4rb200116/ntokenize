@@ -2,31 +2,45 @@
 
 namespace ntokenize {
   // "[ \f\t]*"
-  Rule(Whitespace) {
-    int b=t->end;
-    t->start = t->end;
+  TRule(whitespace) {
+    current.start = current.end;
+    current.type = lex::Token::Ignore;
 
-    t->type = lex::token["TYPE_IGNORE"];
-
-    switch ((*t->line)[t->end]) {
-      case ' ':
+    switch (*curr_char) {
       case '\f':
+        current.value.append("\\f");
+        curr_char = file.read_char();
+        break;
+
       case '\t':
-        t->end++;
+        current.value.append("\\r");
+        curr_char = file.read_char();
+        break;
+
+      case ' ':
+        step();
         break;
 
       default:
-        t->type = lex::token["ERRORTOKEN"];
-        t->end = b;
+        current.type = lex::Token::Error;
         return false;
     }
 
-    for (t->end; t->end <= t->line->length(); t->end++) {
-      switch ((*t->line)[t->end]) {
-        case ' ':
+    for (; curr_char;) {
+      switch (*curr_char) {
         case '\f':
+          current.value.append("\\f");
+          curr_char = file.read_char();
+          break;
+
         case '\t':
-          continue;
+          current.value.append("\\r");
+          curr_char = file.read_char();
+          break;
+
+        case ' ':
+          step();
+          break;
 
         default:
           break;
@@ -34,211 +48,154 @@ namespace ntokenize {
 
       break;
     }
-
-    t->start = b;
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
 
     return true;
   }
 
   // "#[^\r\n]*"
-  Rule(Comment) {
-    int b=t->end;
-    t->start = t->end;
-    t->type = lex::token["COMMENT"];
+  TRule(comment) {
+    current.start = current.end;
+    current.type = lex::Token::Comment;
 
-    if ((*t->line)[t->end] != '#') {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
+    if (*curr_char != '#') {
+      current.type = lex::Token::Error;
       return false;
     }
 
-    for (t->end; t->end <= t->line->length(); t->end++) {
-      switch ((*t->line)[t->end]) {
-        case '\r':
-        case '\n':
-          break;
-
+    for (; curr_char; step()) {
+      switch (*curr_char) {
         default:
           continue;
+
+        case '\r':
+          current.value.append("\\r");
+          curr_char = file.read_char();
+
+          if (*curr_char != '\n') {
+            current.type = lex::Token::Error;
+            return false;
+          }
+
+        case '\n':
+          current.value.append("\\n");
+          curr_char = nullptr;
+          break;
       }
 
       break;
-    }
-
-    switch ((*t->line)[t->end]) {
-      case '\r':
-      case '\n':
-        break;
-
-      default:
-        t->type = lex::token["ERRORTOKEN"];
-        t->end = b;
-        return false;
-    }
-
-    //t->end = t->line->length();
-
-    t->start = b;
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
-    t->type = lex::token["COMMENT"];
-
-    return true;
-  }
-
-  // Whitespace(Funny|Whitespace)Comment?
-  Rule(Ignore) {
-    int end = t->end;
-
-    if (Whitespace(t))
-      return true;
-
-    t->end = end;
-
-    if (Funny(t))
-      return true;
-
-    t->end = end;
-
-    if (Comment(t))
-      return true;
-
-    t->end = end;
-
-    return false;
-  }
-
-  // "\w+"
-  Rule(Name) {
-    int b = t->end;
-    t->start = t->end;
-    t->type = lex::token["NAME"];
-
-    if (!isalpha((*t->line)[t->end])) {
-      if ((*t->line)[t->end] != '_') {
-        t->type = lex::token["ERRORTOKEN"];
-        t->end = b;
-        return false;
-      }
-    }
-
-    t->end++;
-
-    for (t->end; t->end <= t->line->length(); t->end++) {
-      if (isalnum((*t->line)[t->end]))
-        continue;
-
-      if ((*t->line)[t->end] == '_')
-        continue;
-
-      break;
-    }
-
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
-    if (t->raw_value.length() == 0) {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
-      return false;
     }
 
     return true;
   }
 
   // "\r?\n(Special)"
-  Rule(Funny) {
-    int b = t->end;
-    t->start = t->end;
+  TRule(funny) {
+    current.start = current.end;
 
-    if (Special(t))
+    if (is_special())
       return true;
 
-    t->end = b;
+    current.type = lex::Token::NewLine;
 
-    t->type = lex::token["NL"];
+    switch (*curr_char) {
+      default:
+        current.type = lex::Token::Error;
+        return false;
 
-    if ((*t->line)[t->end] == '\r')
-      t->end++;
+      case '\r':
+        current.value.append("\\r");
+        curr_char = file.read_char();
 
-    if (!((*t->line)[t->end] == '\n')) {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
-      return false;
+        if (*curr_char != '\n') {
+          current.type = lex::Token::Error;
+          return false;
+        }
+
+      case '\n':
+        current.value.append("\\n");
+        curr_char = nullptr;
+        break;
     }
-
-    t->end++;
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
 
     return true;
   }
 
-  // (Funny|Number|Name|ContStr)
-  Rule(PlainToken) {
-    int b = t->end;
-    t->start = t->end;
-
-    if (Number(t))
+  // Whitespace(Funny|Whitespace)Comment?
+  TRule(ignore) {
+    if (is_whitespace())
       return true;
 
-    t->end = b;
-
-    if (Funny(t))
+    if (is_funny())
       return true;
 
-    t->end = b;
-
-    if (String(t))
+    if (is_comment())
       return true;
 
-    t->end = b;
+    return false;
+  }
 
-    if (Name(t))
+  // "\w+"
+  TRule(name) {
+    current.start = current.end;
+    current.type = lex::Token::Name;
+
+    if (isalpha(*curr_char) || *curr_char == '_') {
+      check:
+        for (step(); curr_char; step()) {
+          if (isalnum(*curr_char) || *curr_char == '_')
+            continue;
+          
+          break;
+        }
+
+        return true;
+    } else if (current.value.length() == 1)
+      if (isalpha(current.value[0]) || current.value[0] == '_')
+        return true;
+
+    error:
+      current.type = lex::Token::Error;
+      return false;
+  }
+
+  // (Funny|Number|Name|String)
+  TRule(plain_token) {
+    if (is_funny())
       return true;
 
-    t->end = b;
+    if (is_number())
+     return true;
+
+    if (is_string())
+      return true;
+
+    if (is_name())
+      return true;
 
     return false;
   }
 
   // (Ignore|PlainToken)
-  Rule(Token) {
-    int b = t->end;
-    t->start = t->end;
-
-    if (Ignore(t))
+  TRule(token) {
+    if (is_plain_token())
       return true;
 
-    t->end = b;
-
-    if (PlainToken(t))
+    if (is_ignore())
       return true;
-
-    t->end = b;
 
     return false;
   }
 
+/*
   // (Whitespace|Comment|Triple)
-  Rule(PseudoExtras) {
-    int b = t->end;
-    t->start = t->end;
-
-    if (Whitespace(t))
+  TRule(pseudo_extras) {
+    if (is_whitespace())
       return true;
 
-    t->end = b;
-
-    if (Comment(t))
+    if (is_comment())
       return true;
 
-    t->end = b;
-
-    if (Triple(t))
+    if (is_triple())
       return true;
 
     t->end = b;
@@ -247,25 +204,17 @@ namespace ntokenize {
   }
 
   // Whitespace(PseudoExtras|Token)
-  Rule(PseudoToken) {
-    int b = t->end;
-    t->start = t->end;
-
-    if (Whitespace(t))
+  TRule(pseudo_token) {
+    if (is_whitespace())
       return true;
 
-    t->end = b;
-
-    if (PseudoExtras(t))
+    if (is_pseudo_extras())
       return true;
 
-    t->end = b;
-
-    if (Token(t))
+    if (is_token(t))
       return true;
-
-    t->end = b;
 
     return false;
   }
+*/
 }

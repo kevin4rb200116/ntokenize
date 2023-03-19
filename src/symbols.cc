@@ -1,16 +1,16 @@
 #include "ntokenize/tokenize.hh"
 
 namespace ntokenize {
-  inline Rule(Paren) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(paren) {
+    switch (*curr_char) {
       case '(':
-        t->type = lex::token["LPAR"];
-        t->end++;
+        current.type = lex::Token::LPar;
+        step();
         return true;
 
       case ')':
-        t->type = lex::token["RPAR"];
-        t->end++;
+        current.type = lex::Token::Rpar;
+        step();
         return true;
 
       default:
@@ -18,16 +18,16 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(SquareBrace) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(square_brace) {
+    switch (*curr_char) {
       case '[':
-        t->type = lex::token["LSQB"];
-        t->end++;
+        current.type = lex::Token::LSQB;
+        step();
         return true;
 
       case ']':
-        t->type = lex::token["RSQB"];
-        t->end++;
+        current.type = lex::Token::RSQB;
+        step();
         return true;
 
       default:
@@ -35,11 +35,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Colon) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(colon) {
+    switch (*curr_char) {
       case ':':
-        t->type = lex::token["COLON"];
-        t->end++;
+        current.type = lex::Token::Colon;
+        step();
         return true;
 
       default:
@@ -47,11 +47,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Comma) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(comma) {
+    switch (*curr_char) {
       case ',':
-        t->type = lex::token["COMMA"];
-        t->end++;
+        current.type = lex::Token::Comma;
+        step();
         return true;
 
       default:
@@ -59,11 +59,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Semi) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(semi) {
+    switch (*curr_char) {
       case ';':
-        t->type = lex::token["SEMI"];
-        t->end++;
+        current.type = lex::Token::Semi;
+        step();
         return true;
 
       default:
@@ -71,11 +71,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Plus) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(plus) {
+    switch (*curr_char) {
       case '+':
-        t->type = lex::token["PLUS"];
-        t->end++;
+        current.type = lex::Token::Plus;
+        step();
         return true;
 
       default:
@@ -83,11 +83,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Minus) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(minus) {
+    switch (*curr_char) {
       case '-':
-        t->type = lex::token["MINUS"];
-        t->end++;
+        current.type = lex::Token::Minus;
+        step();
         return true;
 
       default:
@@ -95,11 +95,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Star) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(star) {
+    switch (*curr_char) {
       case '*':
-        t->type = lex::token["STAR"];
-        t->end++;
+        current.type = lex::Token::Star;
+        step();
         return true;
 
       default:
@@ -107,11 +107,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Slash) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(slash) {
+    switch (*curr_char) {
       case '/':
-        t->type = lex::token["SLASH"];
-        t->end++;
+        current.type = lex::Token::Slash;
+        step();
         return true;
 
       default:
@@ -119,11 +119,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(VBar) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(vbar) {
+    switch (*curr_char) {
       case '|':
-        t->type = lex::token["VBAR"];
-        t->end++;
+        current.type = lex::Token::VBar;
+        step();
         return true;
 
       default:
@@ -131,11 +131,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Amper) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(amper) {
+    switch (*curr_char) {
       case '&':
-        t->type = lex::token["AMPER"];
-        t->end++;
+        current.type = lex::Token::Amper;
+        step();
         return true;
 
       default:
@@ -143,11 +143,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Less) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(less) {
+    switch (*curr_char) {
       case '<':
-        t->type = lex::token["LESS"];
-        t->end++;
+        current.type = lex::Token::Less;
+        step();
         return true;
 
       default:
@@ -155,11 +155,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Greater) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(greater) {
+    switch (*curr_char) {
       case '>':
-        t->type = lex::token["GREATER"];
-        t->end++;
+        current.type = lex::Token::Greater;
+        step();
         return true;
 
       default:
@@ -167,11 +167,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Equal) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(equal) {
+    switch (*curr_char) {
       case '=':
-        t->type = lex::token["EQUAL"];
-        t->end++;
+        current.type = lex::Token::Equal;
+        step();
         return true;
 
       default:
@@ -179,11 +179,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Dot) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(dot) {
+    switch (*curr_char) {
       case '.':
-        t->type = lex::token["DOT"];
-        t->end++;
+        current.type = lex::Token::Dot;
+        step();
         return true;
 
       default:
@@ -191,11 +191,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Percent) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(percent) {
+    switch (*curr_char) {
       case '%':
-        t->type = lex::token["PERCENT"];
-        t->end++;
+        current.type = lex::Token::Percent;
+        step();
         return true;
 
       default:
@@ -203,16 +203,16 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Brace) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(brace) {
+    switch (*curr_char) {
       case '{':
-        t->type = lex::token["LBRACE"];
-        t->end++;
+        current.type = lex::Token::LBrace;
+        step();
         return true;
 
       case '}':
-        t->type = lex::token["RBRACE"];
-        t->end++;
+        current.type = lex::Token::RBrace;
+        step();
         return true;
 
       default:
@@ -220,11 +220,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Tilde) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(tilde) {
+    switch (*curr_char) {
       case '~':
-        t->type = lex::token["TILDE"];
-        t->end++;
+        current.type = lex::Token::Tilde;
+        step();
         return true;
 
       default:
@@ -232,11 +232,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Circumflex) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(circumflex) {
+    switch (*curr_char) {
       case '^':
-        t->type = lex::token["CIRCUMFLEX"];
-        t->end++;
+        current.type = lex::Token::Circumflex;
+        step();
         return true;
 
       default:
@@ -244,11 +244,11 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(At) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(at) {
+    switch (*curr_char) {
       case '@':
-        t->type = lex::token["AT"];
-        t->end++;
+        current.type = lex::Token::AT;
+        step();
         return true;
 
       default:
@@ -256,10 +256,10 @@ namespace ntokenize {
     }
   }
 
-  inline Rule(Exclamation) {
-    switch (((*t->line)[t->end])) {
+  inline TRule(exclamation) {
+    switch (*curr_char) {
       case '!':
-        t->end++;
+        step();
         return true;
 
       default:
@@ -268,271 +268,177 @@ namespace ntokenize {
   }
 
   // '\\~|\\}|\\|=|\\||\\{|\\^=|\\^|\\]|\\[|@=|@|>>=|>>|>=|>|==|=|<=|<<=|<<|<|;|:=|:|/=|//=|//|/|\\.\\.\\.|\\.|\\->|\\-=|\\-|,|\\+=|\\+|\\*=|\\*\\*=|\\*\\*|\\*|\\)|\\(|\\&=|\\&|%=|%|!=)'
-  Rule(Special) {
-    int b = t->end;
-    t->start = t->end;
-    t->type = lex::token["OP"];
+  TRule(special) {
+    current.start = current.end;
+    current.type = lex::Token::Operator;
 
-    if (Paren(t)) {
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
+    if (is_paren())
+      return true;
+
+    if (is_square_brace())
+      return true;
+
+    if (is_colon()) {
+      if (is_equal())
+        current.type = lex::Token::ColonEqual;
 
       return true;
     }
 
-    if (SquareBrace(t)) {
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
+    if (is_comma())
+      return true;
+
+    if (is_semi())
+      return true;
+
+    if (is_plus()) {
+      if (is_equal())
+        current.type = lex::Token::PlusEqual;
 
       return true;
     }
 
-    if (Colon(t)) {
-      if (Equal(t))
-        t->type = lex::token["COLONEQUAL"];
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
-
-      return true;
-    }
-
-    if (Comma(t)) {
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
+    if (is_minus()) {
+        if (is_equal() || is_greater()) {
+          if (current.type == lex::Token::Equal)
+            current.type = lex::Token::MinEqual;
+          if (current.type == lex::Token::Greater)
+            current.type = lex::Token::RArrow;
+        }
 
       return true;
     }
 
-    if (Semi(t)) {
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
+    if (is_star()) {
+      if (is_equal() || is_star()) {
+        if (current.type == lex::Token::Equal)
+          current.type = lex::Token::StarEqual;
 
-      return true;
-    }
+        if (current.type == lex::Token::Star) {
+          current.type = lex::Token::DoubleStar;
 
-    if (Plus(t)) {
-      if (Equal(t))
-        t->type = lex::token["PLUSEQUAL"];
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
-
-      return true;
-    }
-
-    if (Minus(t)) {
-        if (Equal(t) || Greater(t))
-          if (t->type == lex::token["EQUAL"])
-            t->type = lex::token["MINEQUAL"];
-          if (t->type == lex::token["GREATER"])
-            t->type = lex::token["RARROW"];
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
-
-      return true;
-    }
-
-    if (Star(t)) {
-      if (Equal(t) || Star(t)) {
-        if (t->type == lex::token["EQUAL"])
-          t->type = lex::token["STAREQUAL"];
-
-        if (t->type == lex::token["STAR"]) {
-          t->type = lex::token["DOUBLESTAR"];
-
-          if (Equal(t)) {
-            t->type = lex::token["DOUBLESTAREQUAL"];
+          if (is_equal()) {
+            current.type = lex::Token::DoubleStarEqual;
           }
         }
       }
 
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
+      return true;
+    }
+
+    if (is_slash()) {
+      if (is_equal() || is_slash()) {
+        if (current.type == lex::Token::Equal)
+          current.type = lex::Token::SlashEqual;
+
+        if (current.type == lex::Token::Slash) {
+          current.type = lex::Token::DoubleSlash;
+
+          if (is_equal())
+            current.type = lex::Token::DoubleSlashEqual;
+        }
+      }
 
       return true;
     }
 
-    if (Slash(t)) {
-      if (Equal(t) || Slash(t)) {
-        if (t->type == lex::token["EQUAL"])
-          t->type = lex::token["SLASHEQUAL"];
+    if (is_vbar()) {
+      if (is_equal())
+        current.type = lex::Token::VBarEqual;
 
-        if (t->type == lex::token["SLASH"]) {
-          t->type = lex::token["DOUBLESLASH"];
+      return true;
+    }
 
-          if (Equal(t)) {
-            t->type = lex::token["DOUBLESLASHEQUAL"];
+    if (is_amper()) {
+      if (is_equal())
+        current.type = lex::Token::AmperEqual;
+
+      return true;
+    }
+
+    if (is_less()) {
+      if (is_equal() || is_less()) {
+        if (current.type == lex::Token::Equal)
+          current.type = lex::Token::LessEqual;
+
+        if (current.type == lex::Token::Less) {
+          current.type = lex::Token::LShift;
+
+          if (is_equal())
+            current.type = lex::Token::LShiftEqual;
+        }
+      }
+
+      return true;
+    }
+
+    if (is_greater()) {
+      if (is_equal() || is_greater()) {
+        if (current.type == lex::Token::Equal)
+          current.type = lex::Token::GreaterEqual;
+
+        if (current.type == lex::Token::Greater) {
+          current.type = lex::Token::RShift;
+
+          if (is_equal()) {
+            current.type = lex::Token::RshiftEqual;
           }
         }
       }
 
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
+      return true;
+    }
+
+    if (is_equal()) {
+      if (is_equal())
+        current.type = lex::Token::EQEqual;
 
       return true;
     }
 
-    if (VBar(t)) {
-      if (Equal(t))
-        t->type = lex::token["VBAREQUAL"];
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
+    if (is_dot()) {
+      if (is_dot())
+        if (is_dot())
+          current.type = lex::Token::Ellipsis;
 
       return true;
     }
 
-    if (Amper(t)) {
-      if (Equal(t))
-        t->type = lex::token["AMPEREQUAL"];
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
+    if (is_percent()) {
+      if (is_equal())
+        current.type = lex::Token::PercentEqual;
 
       return true;
     }
 
-    if (Less(t)) {
-      if (Equal(t) || Less(t)) {
-        if (t->type == lex::token["EQUAL"])
-          t->type = lex::token["LESSEQUAL"];
+    if (is_brace())
+      return true;
 
-        if (t->type == lex::token["LESS"]) {
-          t->type = lex::token["LEFTSHIFT"];
+    if (is_tilde())
+      return true;
 
-          if (Equal(t)) {
-            t->type = lex::token["LEFTSHIFTEQUAL"];
-          }
-        }
-      }
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
+    if (is_circumflex()) {
+      if (is_equal())
+        current.type = lex::Token::CircumflexEqual;
 
       return true;
     }
 
-    if (Greater(t)) {
-      if (Equal(t) || Greater(t)) {
-        if (t->type == lex::token["EQUAL"])
-          t->type = lex::token["GREATEREQUAL"];
-
-        if (t->type == lex::token["GREATER"]) {
-          t->type = lex::token["RIGHTSHIFT"];
-
-          if (Equal(t)) {
-            t->type = lex::token["RIGHTSHIFTEQUAL"];
-          }
-        }
-      }
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
+    if (is_at()) {
+      if (is_equal())
+        current.type = lex::Token::ATEqual;
 
       return true;
     }
 
-    if (Equal(t)) {
-      if (Equal(t))
-        t->type = lex::token["EQEQUAL"];
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
+    if (is_exclamation()) {
+      if (is_equal())
+        current.type = lex::Token::NotEqual;
 
       return true;
     }
 
-    if (Dot(t)) {
-      if (Dot(t))
-        if (Dot(t))
-          lex::token["ELLIPSIS"];
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
-
-      return true;
-    }
-
-    if (Percent(t)) {
-      if (Equal(t))
-        t->type = lex::token["PERCENTEQUAL"];
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
-
-      return true;
-    }
-
-    if (Brace(t)) {
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
-
-      return true;
-    }
-
-    if (Tilde(t)) {
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
-
-      return true;
-    }
-
-    if (Circumflex(t)) {
-      if (Equal(t))
-        t->type = lex::token["CIRCUMFLEXEQUAL"];
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
-
-      return true;
-    }
-
-    if (At(t)) {
-      if (Equal(t))
-        t->type = lex::token["ATEQUAL"];
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
-
-      return true;
-    }
-
-    if (Exclamation(t)) {
-      if (Equal(t))
-        t->type = lex::token["NOTEQUAL"];
-
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
-
-      return true;
-    }
-
-    t->type = lex::token["ERRORTOKEN"];
-    t->end = b;
-
+    current.type = lex::Token::Error;
     return false;
   }
 } // namespace tokenize

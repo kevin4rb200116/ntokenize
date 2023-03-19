@@ -6,15 +6,16 @@ using namespace ntokenize;
 int main(int argc, char** argv, char** environ) {
   Tokenizer tokenize = Tokenizer(stdin);
 
-  for (auto token=tokenize.next();
-       token->type != lex::token["ENDMARKER"];
-       token=tokenize.next()) {
+  while (!feof(stdin)) {
+    tokenize.next();
 
-    if (token->type == lex::token["ERRORTOKEN"])
-      return EXIT_FAILURE;
+    if (tokenize.current.type == lex::Token::EndMarker)
+      break;
 
-    token->dump(false);
+    printf("%s\n", tokenize.current.as_string().c_str());
   }
+
+  printf("%s\n", tokenize.current.as_string().c_str());
 
   return EXIT_SUCCESS;
 }

@@ -1,76 +1,30 @@
 #include "ntokenize/tokenize.hh"
 
 namespace ntokenize {
-  int TokenInfo::exact_type() {
-    bool have_op=false;
-
-    for (auto &&type: lex::EXACT_TOKEN_TYPE)
-      if (raw_value == type.first)
-        have_op=true;
-
-    if (type == lex::token["OP"] && have_op)
-      return lex::EXACT_TOKEN_TYPE[raw_value];
-    else
-      return type;
+  unique_ptr<char> File::read_char() {
+    if (feof(fp))
+      return nullptr;
+    
+    return make_unique<char>(getc(fp));
   }
 
-  void TokenInfo::dump(bool with_line) {
-    string format;
-
-    if (with_line)
-      format =
-        "%s { type: %i, "
-        "raw_value: \"%s\", "
-        "start: %i, "
-        "end: %i, "
-        "line: \"%s\" }\n";
-    else
-      format =
-        "%s { type: %i, "
-        "raw_value: \"%s\", "
-        "start: %i, "
-        "end: %i }\n";
-
-    printf(format.c_str(),
-      lex::token_name[exact_type()].c_str(),
-      type,
-      raw_value.c_str(),
-      start,
-      end,
-      line->c_str()
-    );
-  }
-
-  void TokenInfo::from(TokenInfo* t) {
-    type = t->type;
-
-    raw_value.clear();
-    raw_value.append(t->raw_value);
-
-    start = t->start;
-    end = t->end;
-
-    line = t->line;
-  }
-
-  string read_file(FILE* fp) {
-    string file;
+  unique_ptr<string> File::read_file() {
+    string file = string();
 
     if (feof(fp))
-      return file;
+      return make_unique<string>(file);
 
     for (char c=getc(fp); !feof(fp); c=getc(fp))
       file.push_back(c);
 
-    return file;
+    return make_unique<string>(file);
   }
 
-  string read_line(FILE* fp) {
+  unique_ptr<string> File::read_line() {
     string line;
 
-    if (feof(fp)) {
-      return line;
-    }
+    if (feof(fp))
+      return make_unique<string>(line);
 
     for (char c=getc(fp); !feof(fp); c=getc(fp)) {
       line.push_back(c);
@@ -79,38 +33,104 @@ namespace ntokenize {
         break;
     }
 
-    return line;
+    return make_unique<string>(line);
   }
 
-  TokenInfo* Tokenizer::next() {
-    if (current.end != 0)
-      current.end++;
+  void Token::clear() {
+    type = lex::Token::Error;
+    start = pair<size_t,size_t>();
+    end = pair<size_t,size_t>();
+    value.clear();
+  }
 
-    if (current.end == current.line->length()) {
-      current.type = 0;
-      current.raw_value.clear();
-      current.start = 0;
-      current.end = 0;
-      current.line->clear();
+  unique_ptr<Token> Token::from(Token* other) {
+    Token t;
+
+    t.clear();
+
+    t.type = other->type;
+    t.start = pair<size_t,size_t>(other->start);
+    t.end = pair<size_t,size_t>(other->end);
+    t.value.append(other->value);
+
+    return make_unique<Token>(t);
+  }
+
+  void Token::copy(Token* other) {
+    clear();
+
+    type = other->type;
+    start = pair<size_t,size_t>(other->start);
+    end = pair<size_t,size_t>(other->end);
+    value.append(other->value);
+  }
+
+  string Token::as_string() {
+    char* format = (char*)
+      "Token "
+      "{"
+      " type: \"%s\","
+      " start: { %i, %i },"
+      " end: { %i, %i }"
+      " value: \"%s\" "
+      "}";
+    
+    string s=string();
+    s.reserve(256);
+
+    sprintf(&s[0], format,
+      lex::token_name[type].c_str(),
+      start.first,start.second,
+      end.first,end.second,
+      value.c_str()
+    );
+
+    return s;
+  }
+
+  void Tokenizer::eat() {
+    current.value.push_back(*curr_char);
+    current.end.second++;
+  }
+
+  void Tokenizer::step() {
+    eat();
+    curr_char = file.read_char();
+  }
+
+  void Tokenizer::next() {
+    current.clear();
+
+    if (last.type == lex::Token::NewLine) {
+      current.start.first++;
+      current.start.second = 0;
+      current.end.first++;
+      current.end.second = 0;
     }
 
-    if (current.line->empty()) {
-      current.line->clear();
-      current.line->append(read_line(fp));
+    if (curr_char == nullptr) {
+      curr_char = file.read_char();
 
-      if (current.line->empty()) {
-        current.type = lex::token["ENDMARKER"];
-        return &current;
+      if (curr_char == nullptr) null_char: {
+        current.type = lex::Token::EndMarker;
+
+        current.start.first++;
+        current.start.second = 0;
+
+        current.end.first++;
+        current.end.second = 0;
+
+        return;
       }
     }
 
-    PseudoToken(&current);
+    if (is_token()) {
+      last.copy(&current);
+      return;
+    }
 
-    last.from(&current);
-
-    if (current.end == 0)
-      current.end++;
-
-    return &last;
+    curr_char = file.read_char();
+    if (curr_char == nullptr)
+      goto null_char;
   }
 }

@@ -1,417 +1,248 @@
 #include "ntokenize/tokenize.hh"
 
 namespace ntokenize {
-  // "0[xX](?:_?[0-9a-fA-F])+"
-  Rule(HexNumber) {
-    int b = t->end;
-    t->start = t->end;
-    t->type = lex::token["NUMBER"];
+  // "dec_number = (?:0(?:_?0)*|[1-9](?:_?[0-9])*)"
+  inline TRule(dec_number) {
+    current.start = current.end;
 
-    switch ((*t->line)[t->end]) {
-      case '0':
-        t->end++;
+    if (isalnum(*curr_char)) {
+      if (!isdigit(*curr_char))
+        goto error;
 
-        switch ((*t->line)[t->end]) {
-          case 'x':
-          case 'X':
-            t->end += 2;
-            break;
-
-          default:
-            t->type = lex::token["ERRORTOKEN"];
-            t->end = b;
-            return false;
-        }
+      for (step(); curr_char; step()) {
+        if (isalnum(*curr_char))
+          if (isdigit(*curr_char))
+            continue;
 
         break;
-
-      default:
-        t->type = lex::token["ERRORTOKEN"];
-        t->end = b;
-        return false;
-    }
-
-    for (t->end; t->line->length() > t->end; t->end++) {
-      if ((*t->line)[t->end] >= '0')
-        if ((*t->line)[t->end] <= '9')
-          continue;
-
-      if ((*t->line)[t->end] >= 'a')
-        if ((*t->line)[t->end] <= 'f')
-          continue;
-
-      if ((*t->line)[t->end] >= 'A')
-        if ((*t->line)[t->end] <= 'F')
-          continue;
-
-      break;
-    }
-
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
-    if (t->raw_value.length() < 3) {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
-      return false;
-    }
-
-    return true;
-  }
-
-  // "0[bB](?:_?[01])+"
-  Rule(Binnumber) {
-    int b = t->end;
-    t->start = t->end;
-    t->type = lex::token["NUMBER"];
-
-    switch ((*t->line)[t->end]) {
-      case '0':
-        t->end++;
-
-        switch ((*t->line)[t->end]) {
-          case 'b':
-          case 'B':
-            t->end += 2;
-            break;
-
-          default:
-            t->type = lex::token["ERRORTOKEN"];
-            t->end = b;
-            return false;
-        }
-
-        break;
-
-      default:
-        t->type = lex::token["ERRORTOKEN"];
-        t->end = b;
-        return false;
-    }
-
-    for (t->end; t->line->length() > t->end; t->end++) {
-      if ((*t->line)[t->end] == '0')
-        continue;
-
-      if ((*t->line)[t->end] == '1')
-        continue;
-
-      break;
-    }
-
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
-    if (t->raw_value.length() < 3) {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
-      return false;
-    }
-
-    return true;
-  }
-
-  // "0[oO](?:_?[0-7])+"
-  Rule(Octnumber) {
-    int b = t->end;
-    t->start = t->end;
-    t->type = lex::token["NUMBER"];
-
-    switch ((*t->line)[t->end]) {
-      case '0':
-        t->end++;
-
-        switch ((*t->line)[t->end]) {
-          case 'o':
-          case 'O':
-            t->end += 2;
-            break;
-
-          default:
-            t->type = lex::token["ERRORTOKEN"];
-            t->end = b;
-            return false;
-        }
-
-        break;
-
-      default:
-        t->type = lex::token["ERRORTOKEN"];
-        t->end = b;
-        return false;
-    }
-
-    for (t->end; t->line->length() > t->end; t->end++) {
-      if ((*t->line)[t->end] >= '0')
-        if ((*t->line)[t->end] <= '7')
-          continue;
-
-      break;
-    }
-
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
-    if (t->raw_value.length() < 3) {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
-      return false;
-    }
-
-    return true;
-  }
-
-  // "(?:0(?:_?0)*|[1-9](?:_?[0-9])*)"
-  Rule(Decnumber) {
-    int b = t->end;
-    t->start = t->end;
-    t->type = lex::token["NUMBER"];
-
-    if (!((*t->line)[t->end] >= '0')) {
-      if (!((*t->line)[t->end] <= '9')) {
-        t->type = lex::token["ERRORTOKEN"];
-        t->end = b;
-        return false;
       }
+
+      current.type = lex::Token::Number;
+      return true;
     }
 
-    for (t->end; t->line->length() > t->end; t->end++) {
-      if ((*t->line)[t->end] >= '0')
-        if ((*t->line)[t->end] <= '9')
-          continue;
-
-      break;
-    }
-
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
-    if (t->raw_value.length() == 0) {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
+    error:
+      current.type = lex::Token::Error;
       return false;
-    }
-
-    return true;
   }
 
-  // "(HexNumber|Binnumber|Octnumber|Decnumber)"
-  Rule(Intnumber) {
-    int b = t->end;
-    t->start = t->end;
-    t->type = lex::token["NUMBER"];
+  // bin_number = "0[bB](?:_?[01])+"
+  inline TRule(bin_number) {
+    if (isalnum(*curr_char)) {
+      for (step(); curr_char; step()) {
+        if (isalnum(*curr_char)) {
+          if ('0' == *curr_char || *curr_char == '1')
+            continue;
+          else
+            break;
+        }
 
-    if (HexNumber(t)) {
+        break;
+      }
+
+      if (current.value.length() < 3)
+        goto error;
+
       return true;
     }
 
-    t->end = b;
-
-    if (Binnumber(t)) {
-      return true;
-    }
-
-    t->end = b;
-
-    if (Octnumber(t)) {
-      return true;
-    }
-
-    t->end = b;
-
-    if (Decnumber(t)) {
-      return true;
-    }
-
-    t->end = b;
-
-    return false;
+    error:
+      return false;
   }
 
-  // "[eE][-+]?[0-9](?:_?[0-9])*"
-  Rule(Exponent) {
-    int b = t->end;
-    t->start = t->end;
-    t->type = lex::token["NUMBER"];
+  // oct_number = "0[oO](?:_?[0-7])+"
+  inline TRule(oct_number) {
+    if (isalnum(*curr_char)) {
+      for (step(); curr_char; step()) {
+        if (isalnum(*curr_char)) {
+          if ('0' <= *curr_char && *curr_char <= '7')
+            continue;
+          else
+            break;
+        }
 
-    switch ((*t->line)[t->end]) {
+        break;
+      }
+
+      if (current.value.length() < 3)
+        goto error;
+
+      return true;
+    }
+
+    error:
+      return false;
+  }
+
+  // hex_number = "0[xX](?:_?[0-9a-fA-F])+"
+  inline TRule(hex_number) {
+    if (isalnum(*curr_char)) {
+      for (step(); curr_char; step()) {
+        if (isalnum(*curr_char)) {
+          if (isdigit(*curr_char))
+            continue;
+          else if ('a' <= *curr_char && *curr_char <= 'f')
+            continue;
+          else if ('A' <= *curr_char && *curr_char <= 'F')
+            continue;
+          else
+            break;
+        }
+
+        break;
+      }
+
+      if (current.value.length() < 3)
+        goto error;
+
+      return true;
+    }
+
+    error:
+      return false;
+  }
+
+  // "(Decnumber|HexNumber|Binnumber|Octnumber)"
+  // TRule(int_number) {
+
+  // }
+
+  // exponent = "[eE][-+]?Decnumber(?:_?Decnumber)*"
+  TRule(exponent) {
+    if (isalnum(*curr_char)) {
+      if ('-' == *curr_char || *curr_char == '+')
+        step();
+
+      if (!is_dec_number())
+        goto error;
+
+      return true;
+    }
+
+    error:
+      return false;
+  }
+
+  // point_float = (Decnumber\.Decnumber)?|\.Decnumber)Exponent?
+  TRule(point_float) {
+    if (!is_dec_number())
+      goto error;
+
+    switch (*curr_char) {
       case 'e':
       case 'E':
-        t->end++;
-
-        switch ((*t->line)[t->end]) {
-          case '-':
-          case '+':
-            t->end++;
-            break;
-        }
-
-        break;
+        step();
+        if (!is_exponent())
+          if (!isdigit(current.value[current.value.length()-1]))
+            goto error;
 
       default:
-        t->type = lex::token["ERRORTOKEN"];
-        t->end = b;
-        return false;
+        break;
     }
 
-    if (!Decnumber(t)) {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
-      return false;
-    }
-
-    t->end++;
-    t->start = b;
-
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
+    current.type = lex::Token::Number;
     return true;
-  }
 
-  // ("Decnumber\.Decnumber)?'|r'\.Decnumber)Exponent?
-  Rule(Pointfloat) {
-    int b = t->end;
-    t->start = t->end;
-
-    if (Decnumber(t)) {
-      t->end++;
-    }
-
-    if ((*t->line)[t->end] != '.') {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
+    error:
+      current.type = lex::Token::Error;
       return false;
-    }
-
-    t->end++;
-
-    if (!Decnumber(t)) {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
-      return false;
-    }
-
-    t->end++;
-
-    if (Exponent(t))
-      t->end++;
-
-    t->type = lex::token["NUMBER"];
-    t->start=b;
-
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
-    return true;
   }
 
   // "Decnumber+(_Decnumber+)*Exponent"
-  Rule(Expfloat) {
-    int b = t->end;
-    t->start = t->end;
-    t->type = lex::token["NUMBER"];
-
-    if (!Decnumber(t)) {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
-      return false;
-    }
-
-    t->end++;
-
-    if (!Exponent(t)) {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
-      return false;
-    }
-
-    t->end++;
-    t->start=b;
-
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
-    return true;
-  }
+  // TRule(exp_float) {
+    
+  // }
 
   // (Pointfloat|Expfloat);
-  Rule(Floatnumber) {
-    int b = t->end;
-    t->start = t->end;
-    t->type = lex::token["NUMBER"];
+  // TRule(float_number) {
 
-    if (Pointfloat(t))
-      return true;
+  // }
 
-    t->end = b;
+  // "(Decnumber(?:_?Decnumber)*[jJ]|(Floatnumber[jJ])"
+  // TRule(imag_number) {
+    
+  // }
 
-    if (Expfloat(t))
-      return true;
+  // number = (imag_number|float_number|int_number)
+  TRule(number) {
+    if (is_dec_number()) {
+      switch (*curr_char) {
+        case 'j':
+        case 'J':
+          step();
 
-    t->end = b;
+          current.type = lex::Token::Number;
+          return true; // imag_number = "(Decnumber(?:_?Decnumber)*[jJ]|(Floatnumber[jJ])"
 
-    return false;
-  }
+        case 'e':
+        case 'E':
+          step();
+          if (!is_exponent())
+            goto error;
 
-  // "([0-9](?:_?[0-9])*[jJ]|(Floatnumber[jJ])"
-  Rule(Imagnumber) {
-    int b = t->end;
-    t->start = t->end;
+          current.type = lex::Token::Number;
+          return true; // "Decnumber+(_Decnumber+)*Exponent"
+        
+        case '.':
+          step();
+          if (!is_point_float())
+            goto error;
 
-    if (!Floatnumber(t)) {
-      t->type = lex::token["NUMBER"];
-      t->end = b;
+          current.type = lex::Token::Number;
+          return true; // (Decnumber\.Decnumber)?|\.Decnumber)Exponent?
 
-      if (!Decnumber(t)) {
-        t->type = lex::token["ERRORTOKEN"];
-        t->end = b;
-        return false;
+        case 'b':
+        case 'B':
+          if (current.value[current.value.length()-1] != '0')
+            goto error;
+
+          step();
+
+          if (!is_bin_number())
+            goto error;
+
+          current.type = lex::Token::Number;
+          return true;
+
+        case 'o':
+        case 'O':
+          if (current.value[current.value.length()-1] != '0')
+            goto error;
+
+          step();
+
+          if (!is_oct_number())
+            goto error;
+
+          current.type = lex::Token::Number;
+          return true;
+
+        case 'x':
+        case 'X':
+          if (current.value[current.value.length()-1] != '0')
+            goto error;
+
+          step();
+
+          if (!is_hex_number())
+            goto error;
+
+          current.type = lex::Token::Number;
+          return true;
+
+        default:
+          break;
       }
-    }
 
-    t->end++;
-
-    switch ((*t->line)[t->end]) {
-      case 'j':
-      case 'J':
-        t->end++;
-        break;
-      
-      default:
-        t->type = lex::token["ERRORTOKEN"];
-        t->end = b;
+      if (!isdigit(current.value[current.value.length()-1]))
         return false;
+
+      current.type = lex::Token::Number;
+      return true;
     }
 
-    t->start = b;
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
-    return true;
-  }
-
-  // (Imagnumber|Floatnumber|Intnumber)
-  Rule(Number) {
-    int b = t->end;
-    t->start = t->end;
-    t->type = lex::token["NUMBER"];
-
-    if (Floatnumber(t))
-      return true;
-
-    t->end = b;
-
-    if (Imagnumber(t))
-      return true;
-
-    t->end = b;
-
-    if (Intnumber(t))
-      return true;
-
-    t->end = b;
-
-    return false;
+    error:
+      current.type = lex::Token::Error;
+      return false;
   }
 }
