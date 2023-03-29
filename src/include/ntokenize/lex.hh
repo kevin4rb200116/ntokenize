@@ -72,7 +72,7 @@ namespace ntokenize::lex {
     NT_OFFSET = 256,
   } Token;
 
-  extern map<Token,string> token_name;
+  extern map<int16_t,string> token_name;
 
 /*
   typedef map<string,int> TokenList;

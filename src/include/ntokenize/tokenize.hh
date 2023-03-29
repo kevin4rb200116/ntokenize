@@ -24,7 +24,7 @@ namespace ntokenize {
   } File;
 
   typedef struct Token {
-    lex::Token type;
+    int16_t type;
     pair<size_t,size_t> start, end;
     string value;
 

@@ -3,7 +3,7 @@
 #define TokenEntry(name) {Token::name, #name}
 
 namespace ntokenize::lex {
-  map<Token,string> token_name = {
+  map<int16_t,string> token_name = {
     TokenEntry(EndMarker),
     TokenEntry(Name),
     TokenEntry(Number),
