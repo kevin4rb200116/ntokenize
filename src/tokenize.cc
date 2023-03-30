@@ -36,6 +36,21 @@ namespace ntokenize {
     return make_unique<string>(line);
   }
 
+  Token::Token() {
+    type = lex::Token::Error;
+    start = pair<size_t,size_t>();
+    end = pair<size_t,size_t>();
+    value=string();
+  }
+
+  Token::Token(lex::Token type,
+              string value, pair<size_t,size_t> start, pair<size_t,size_t> end) {
+    type=type;
+    value=value;
+    start=start;
+    end=end;
+  }
+
   void Token::clear() {
     type = lex::Token::Error;
     start = pair<size_t,size_t>();

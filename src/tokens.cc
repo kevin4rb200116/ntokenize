@@ -2,7 +2,7 @@
 
 namespace ntokenize {
   // "[ \f\t]*"
-  TRule(whitespace) {
+  bool Tokenizer::is_whitespace() {
     current.start = current.end;
     current.type = lex::Token::Ignore;
 
@@ -53,7 +53,7 @@ namespace ntokenize {
   }
 
   // "#[^\r\n]*"
-  TRule(comment) {
+  bool Tokenizer::is_comment() {
     current.start = current.end;
     current.type = lex::Token::Comment;
 
@@ -89,7 +89,7 @@ namespace ntokenize {
   }
 
   // "\r?\n(Special)"
-  TRule(funny) {
+  bool Tokenizer::is_funny() {
     current.start = current.end;
 
     if (is_special())
@@ -121,7 +121,7 @@ namespace ntokenize {
   }
 
   // Whitespace(Funny|Whitespace)Comment?
-  TRule(ignore) {
+  bool Tokenizer::is_ignore() {
     if (is_whitespace())
       return true;
 
@@ -135,31 +135,29 @@ namespace ntokenize {
   }
 
   // "\w+"
-  TRule(name) {
+  bool Tokenizer::is_name() {
     current.start = current.end;
     current.type = lex::Token::Name;
 
     if (isalpha(*curr_char) || *curr_char == '_') {
-      check:
-        for (step(); curr_char; step()) {
-          if (isalnum(*curr_char) || *curr_char == '_')
-            continue;
-          
-          break;
-        }
+      for (step(); curr_char; step()) {
+        if (isalnum(*curr_char) || *curr_char == '_')
+          continue;
+        
+        break;
+      }
 
-        return true;
+      return true;
     } else if (current.value.length() == 1)
       if (isalpha(current.value[0]) || current.value[0] == '_')
         return true;
 
-    error:
-      current.type = lex::Token::Error;
-      return false;
+    current.type = lex::Token::Error;
+    return false;
   }
 
   // (Funny|Number|Name|String)
-  TRule(plain_token) {
+  bool Tokenizer::is_plain_token() {
     if (is_funny())
       return true;
 
@@ -176,7 +174,7 @@ namespace ntokenize {
   }
 
   // (Ignore|PlainToken)
-  TRule(token) {
+  bool Tokenizer::is_token() {
     if (is_plain_token())
       return true;
 
@@ -185,36 +183,4 @@ namespace ntokenize {
 
     return false;
   }
-
-/*
-  // (Whitespace|Comment|Triple)
-  TRule(pseudo_extras) {
-    if (is_whitespace())
-      return true;
-
-    if (is_comment())
-      return true;
-
-    if (is_triple())
-      return true;
-
-    t->end = b;
-
-    return false;
-  }
-
-  // Whitespace(PseudoExtras|Token)
-  TRule(pseudo_token) {
-    if (is_whitespace())
-      return true;
-
-    if (is_pseudo_extras())
-      return true;
-
-    if (is_token(t))
-      return true;
-
-    return false;
-  }
-*/
 }

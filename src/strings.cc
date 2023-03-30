@@ -2,7 +2,7 @@
 
 namespace ntokenize {
   // (|RB|u|Rb|Br|b|fr|r|Rf|br|fR|Fr|R|f|rb|FR|BR|rf|bR|rB|B|F|rF|RF|U)
-  TRule(string_prefix) {
+  bool Tokenizer::is_string_prefix() {
     current.start = current.end;
 
     switch (*curr_char) {
@@ -77,7 +77,7 @@ namespace ntokenize {
   }
 
   // "[^'\\]*(?:\\.[^'\\]*)*'"
-  TRule(single) {
+  bool Tokenizer::is_single() {
     current.start = current.end;
     current.type = lex::Token::String;
 
@@ -115,7 +115,7 @@ namespace ntokenize {
   }
 
   // "[^\"\\]*(?:\\.[^\"\\]*)*\"\""
-  TRule(double) {
+  bool Tokenizer::is_double() {
     current.start = current.end;
     current.type = lex::Token::String;
 
@@ -152,145 +152,8 @@ namespace ntokenize {
     return true;
   }
 
-/*
-  // "[^'\\]*(?:(?:\\.|'(?!''))[^'\\]*)*'''"
-  TRule(single3) {
-    current.start = current.end;
-    current.type = lex::Token::String;
-
-    if (*curr_char != '\'') {
-      step();
-      if ((*t->line)[t->end+1] != '\'') {
-        if ((*t->line)[t->end+2] != '\'') {
-          current.type = lex::Token::Error;
-          return false;
-        }
-      }
-    }
-
-    t->end += 3;
-
-    for (t->end; t->line->length() > t->end; t->end++) {
-      if (*curr_char == '\\')
-        t->end += 2;
-
-      if (*curr_char == '\'')
-        if ((*t->line)[t->end+1] == '\'')
-          if ((*t->line)[t->end+2] == '\'')
-            break;
-    }
-
-    if (*curr_char != '\'') {
-      if ((*t->line)[t->end+1] != '\'') {
-        if ((*t->line)[t->end+2] != '\'') {
-          t->type = lex::token["ERRORTOKEN"];
-          t->end = b;
-          return false;
-        }
-      }
-    }
-
-    t->end += 3;
-
-    t->start = b;
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
-    if (t->raw_value.length() < 6) {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
-      return false;
-    }
-
-    return true;
-  }
-
-  // "[^\"\\]*(?:(?:\\.|\"(?!\"\"))[^\"\\]*)*\"\"\""
-  Rule(Double3) {
-    int b = t->end;
-    t->start = t->end;
-
-    t->type = lex::token["STRING"];
-
-    if (*curr_char != '"') {
-      if ((*t->line)[t->end+1] != '"') {
-        if ((*t->line)[t->end+2] != '"') {
-          t->type = lex::token["ERRORTOKEN"];
-          t->end = b;
-          return false;
-        }
-      }
-    }
-
-    t->end += 3;
-
-    for (t->end; t->line->length() > t->end; t->end++) {
-      if (*curr_char == '\\')
-        t->end += 2;
-
-      if (*curr_char == '"')
-        if ((*t->line)[t->end+1] == '"')
-          if ((*t->line)[t->end+2] == '"')
-            break;
-    }
-
-    if (*curr_char != '"') {
-      if ((*t->line)[t->end+1] != '"') {
-        if ((*t->line)[t->end+2] != '"') {
-          t->type = lex::token["ERRORTOKEN"];
-          t->end = b;
-          return false;
-        }
-      }
-    }
-
-    t->end += 3;
-
-    t->start = b;
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
-    if (t->raw_value.length() < 6) {
-      t->type = lex::token["ERRORTOKEN"];
-      t->end = b;
-      return false;
-    }
-
-    return true;
-  }
-
-  // (StringPrefix\'\'\'|StringPrefix\"\"\")
-  Rule(Triple) {
-    int b = t->end;
-    t->start = t->end;
-
-    if (StringPrefix(t))
-      t->end++;
-
-    if (Single3(t)) {
-      t->end++;
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
-
-      return true;
-    }
-
-    if (Double3(t)) {
-      t->end++;
-      t->start = b;
-      t->raw_value = t->line->substr(t->start,t->end-t->start);
-      t->end--;
-
-      return true;
-    }
-
-    return false;
-  }
-*/
-
   // '(StringPrefix*(Single|Double)
-  TRule(string) {
+  bool Tokenizer::is_string() {
     auto b = current.end;
     current.start = current.end;
     current.type = lex::Token::String;
@@ -309,31 +172,4 @@ namespace ntokenize {
 
     return false;
   }
-
-/*
-  // "StringPrefix*(Triple|String)"
-  Rule(ContStr) {
-    int b = t->end;
-    t->start = t->end;
-
-    if (StringPrefix(t))
-      t->end++;
-
-    if (!Triple(t)) {
-      if (!String(t)) {
-        t->type = lex::token["ERRORTOKEN"];
-        t->end = b;
-        return false;
-      }
-    }
-
-    t->end++;
-
-    t->start = b;
-    t->raw_value = t->line->substr(t->start,t->end-t->start);
-    t->end--;
-
-    return true;
-  }
-*/
 } // namespace tokenize

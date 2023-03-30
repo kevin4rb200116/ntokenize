@@ -1,7 +1,7 @@
 #include "ntokenize/tokenize.hh"
 
 namespace ntokenize {
-  inline TRule(paren) {
+  inline bool Tokenizer::is_paren() {
     switch (*curr_char) {
       case '(':
         current.type = lex::Token::LPar;
@@ -18,7 +18,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(square_brace) {
+  inline bool Tokenizer::is_square_brace() {
     switch (*curr_char) {
       case '[':
         current.type = lex::Token::LSQB;
@@ -35,7 +35,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(colon) {
+  inline bool Tokenizer::is_colon() {
     switch (*curr_char) {
       case ':':
         current.type = lex::Token::Colon;
@@ -47,7 +47,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(comma) {
+  inline bool Tokenizer::is_comma() {
     switch (*curr_char) {
       case ',':
         current.type = lex::Token::Comma;
@@ -59,7 +59,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(semi) {
+  inline bool Tokenizer::is_semi() {
     switch (*curr_char) {
       case ';':
         current.type = lex::Token::Semi;
@@ -71,7 +71,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(plus) {
+  inline bool Tokenizer::is_plus() {
     switch (*curr_char) {
       case '+':
         current.type = lex::Token::Plus;
@@ -83,7 +83,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(minus) {
+  inline bool Tokenizer::is_minus() {
     switch (*curr_char) {
       case '-':
         current.type = lex::Token::Minus;
@@ -95,7 +95,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(star) {
+  inline bool Tokenizer::is_star() {
     switch (*curr_char) {
       case '*':
         current.type = lex::Token::Star;
@@ -107,7 +107,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(slash) {
+  inline bool Tokenizer::is_slash() {
     switch (*curr_char) {
       case '/':
         current.type = lex::Token::Slash;
@@ -119,7 +119,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(vbar) {
+  inline bool Tokenizer::is_vbar() {
     switch (*curr_char) {
       case '|':
         current.type = lex::Token::VBar;
@@ -131,7 +131,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(amper) {
+  inline bool Tokenizer::is_amper() {
     switch (*curr_char) {
       case '&':
         current.type = lex::Token::Amper;
@@ -143,7 +143,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(less) {
+  inline bool Tokenizer::is_less() {
     switch (*curr_char) {
       case '<':
         current.type = lex::Token::Less;
@@ -155,7 +155,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(greater) {
+  inline bool Tokenizer::is_greater() {
     switch (*curr_char) {
       case '>':
         current.type = lex::Token::Greater;
@@ -167,7 +167,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(equal) {
+  inline bool Tokenizer::is_equal() {
     switch (*curr_char) {
       case '=':
         current.type = lex::Token::Equal;
@@ -179,7 +179,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(dot) {
+  inline bool Tokenizer::is_dot() {
     switch (*curr_char) {
       case '.':
         current.type = lex::Token::Dot;
@@ -191,7 +191,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(percent) {
+  inline bool Tokenizer::is_percent() {
     switch (*curr_char) {
       case '%':
         current.type = lex::Token::Percent;
@@ -203,7 +203,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(brace) {
+  inline bool Tokenizer::is_brace() {
     switch (*curr_char) {
       case '{':
         current.type = lex::Token::LBrace;
@@ -220,7 +220,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(tilde) {
+  inline bool Tokenizer::is_tilde() {
     switch (*curr_char) {
       case '~':
         current.type = lex::Token::Tilde;
@@ -232,7 +232,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(circumflex) {
+  inline bool Tokenizer::is_circumflex() {
     switch (*curr_char) {
       case '^':
         current.type = lex::Token::Circumflex;
@@ -244,7 +244,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(at) {
+  inline bool Tokenizer::is_at() {
     switch (*curr_char) {
       case '@':
         current.type = lex::Token::AT;
@@ -256,7 +256,7 @@ namespace ntokenize {
     }
   }
 
-  inline TRule(exclamation) {
+  inline bool Tokenizer::is_exclamation() {
     switch (*curr_char) {
       case '!':
         step();
@@ -268,7 +268,7 @@ namespace ntokenize {
   }
 
   // '\\~|\\}|\\|=|\\||\\{|\\^=|\\^|\\]|\\[|@=|@|>>=|>>|>=|>|==|=|<=|<<=|<<|<|;|:=|:|/=|//=|//|/|\\.\\.\\.|\\.|\\->|\\-=|\\-|,|\\+=|\\+|\\*=|\\*\\*=|\\*\\*|\\*|\\)|\\(|\\&=|\\&|%=|%|!=)'
-  TRule(special) {
+  bool Tokenizer::is_special() {
     current.start = current.end;
     current.type = lex::Token::Operator;
 

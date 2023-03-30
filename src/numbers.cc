@@ -2,7 +2,7 @@
 
 namespace ntokenize {
   // "dec_number = (?:0(?:_?0)*|[1-9](?:_?[0-9])*)"
-  inline TRule(dec_number) {
+  inline bool Tokenizer::is_dec_number() {
     current.start = current.end;
 
     if (isalnum(*curr_char)) {
@@ -27,7 +27,7 @@ namespace ntokenize {
   }
 
   // bin_number = "0[bB](?:_?[01])+"
-  inline TRule(bin_number) {
+  inline bool Tokenizer::is_bin_number() {
     if (isalnum(*curr_char)) {
       for (step(); curr_char; step()) {
         if (isalnum(*curr_char)) {
@@ -51,7 +51,7 @@ namespace ntokenize {
   }
 
   // oct_number = "0[oO](?:_?[0-7])+"
-  inline TRule(oct_number) {
+  inline bool Tokenizer::is_oct_number() {
     if (isalnum(*curr_char)) {
       for (step(); curr_char; step()) {
         if (isalnum(*curr_char)) {
@@ -75,7 +75,7 @@ namespace ntokenize {
   }
 
   // hex_number = "0[xX](?:_?[0-9a-fA-F])+"
-  inline TRule(hex_number) {
+  inline bool Tokenizer::is_hex_number() {
     if (isalnum(*curr_char)) {
       for (step(); curr_char; step()) {
         if (isalnum(*curr_char)) {
@@ -102,13 +102,8 @@ namespace ntokenize {
       return false;
   }
 
-  // "(Decnumber|HexNumber|Binnumber|Octnumber)"
-  // TRule(int_number) {
-
-  // }
-
   // exponent = "[eE][-+]?Decnumber(?:_?Decnumber)*"
-  TRule(exponent) {
+  bool Tokenizer::is_exponent() {
     if (isalnum(*curr_char)) {
       if ('-' == *curr_char || *curr_char == '+')
         step();
@@ -124,7 +119,7 @@ namespace ntokenize {
   }
 
   // point_float = (Decnumber\.Decnumber)?|\.Decnumber)Exponent?
-  TRule(point_float) {
+  bool Tokenizer::is_point_float() {
     if (!is_dec_number())
       goto error;
 
@@ -148,23 +143,8 @@ namespace ntokenize {
       return false;
   }
 
-  // "Decnumber+(_Decnumber+)*Exponent"
-  // TRule(exp_float) {
-    
-  // }
-
-  // (Pointfloat|Expfloat);
-  // TRule(float_number) {
-
-  // }
-
-  // "(Decnumber(?:_?Decnumber)*[jJ]|(Floatnumber[jJ])"
-  // TRule(imag_number) {
-    
-  // }
-
   // number = (imag_number|float_number|int_number)
-  TRule(number) {
+  bool Tokenizer::is_number() {
     if (is_dec_number()) {
       switch (*curr_char) {
         case 'j':

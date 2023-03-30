@@ -21,7 +21,8 @@ lib = library('ntokenize',
   version: '0.2', # same as project obviously
   install : true)
 
-bin = executable('ntokenize', 'src/main.cc', link_with: lib,
+bin = executable('ntokenize', 'src/main.cc',
+  link_with: lib,
   include_directories: incdir,
   install : true)
 

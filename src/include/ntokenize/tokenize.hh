@@ -4,9 +4,6 @@
 #ifndef TokenizeHeader
 #define TokenizeHeader
 
-#define Rule(name) bool is_##name()
-#define TRule(name) bool Tokenizer::is_##name()
-
 namespace ntokenize {
   using namespace std;
 
@@ -33,12 +30,9 @@ namespace ntokenize {
     void copy(Token* other);
     static unique_ptr<Token> from(Token* other);
 
-    Token()
-      : type(lex::Token::Error), value(string()), start({0,0}), end({0,0}) {}
-
+    Token();
     Token(lex::Token type,
-              string value, pair<size_t,size_t> start, pair<size_t,size_t> end)
-      : type(type), value(value), start(start), end(end) {}
+              string value, pair<size_t,size_t> start, pair<size_t,size_t> end);
   } Token;
 
   typedef struct Tokenizer {
@@ -53,58 +47,48 @@ namespace ntokenize {
     Tokenizer(FILE* fp)
       : file(File(fp)) {}
 
-    Rule(whitespace);
-    Rule(comment);
-    Rule(ignore);
-    Rule(name);
-    Rule(hex_number);
-    Rule(bin_number);
-    Rule(oct_number);
-    Rule(dec_number);
-    Rule(int_number);
-    Rule(exponent);
-    Rule(point_float);
-    Rule(exp_float);
-    Rule(float_number);
-    Rule(imag_number);
-    Rule(number);
-    Rule(string_prefix);
-    Rule(single); // single quoted string
-    Rule(double); // double quoted string
-    // Rule(single3);
-    // Rule(double3);
-    // Rule(triple);
-    Rule(string);
-    Rule(cont_str);
-    Rule(special);
-    Rule(funny);
-    Rule(plain_token);
-    Rule(token);
-    Rule(pseudo_extras);
-    Rule(pseudo_token);
+    bool is_whitespace();
+    bool is_comment();
+    bool is_ignore();
+    bool is_name();
+    bool is_hex_number();
+    bool is_bin_number();
+    bool is_oct_number();
+    bool is_dec_number();
+    bool is_exponent();
+    bool is_point_float();
+    bool is_number();
+    bool is_string_prefix();
+    bool is_single();
+    bool is_double();
+    bool is_string();
+    bool is_special();
+    bool is_funny();
+    bool is_plain_token();
+    bool is_token();
 
     private:
-      inline Rule(paren);
-      inline Rule(square_brace);
-      inline Rule(colon);
-      inline Rule(comma);
-      inline Rule(semi);
-      inline Rule(plus);
-      inline Rule(minus);
-      inline Rule(star);
-      inline Rule(slash);
-      inline Rule(vbar);
-      inline Rule(amper);
-      inline Rule(less);
-      inline Rule(greater);
-      inline Rule(equal);
-      inline Rule(dot);
-      inline Rule(percent);
-      inline Rule(brace);
-      inline Rule(tilde);
-      inline Rule(circumflex);
-      inline Rule(at);
-      inline Rule(exclamation);
+      inline bool is_paren();
+      inline bool is_square_brace();
+      inline bool is_colon();
+      inline bool is_comma();
+      inline bool is_semi();
+      inline bool is_plus();
+      inline bool is_minus();
+      inline bool is_star();
+      inline bool is_slash();
+      inline bool is_vbar();
+      inline bool is_amper();
+      inline bool is_less();
+      inline bool is_greater();
+      inline bool is_equal();
+      inline bool is_dot();
+      inline bool is_percent();
+      inline bool is_brace();
+      inline bool is_tilde();
+      inline bool is_circumflex();
+      inline bool is_at();
+      inline bool is_exclamation();
   } Tokenizer;
 }
 
