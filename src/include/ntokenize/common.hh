@@ -6,4 +6,8 @@
 #include <map>
 #include <memory>
 
-#endif
+namespace ntokenize {
+  
+} // namespace ntokenize
+
+#endif //CommonHeader

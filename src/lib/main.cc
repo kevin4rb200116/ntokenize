@@ -1,39 +1,11 @@
-#include "ntokenize/tokenize.hh"
+#include "ntokenize/main.hh"
 
 namespace ntokenize {
   unique_ptr<char> File::read_char() {
     if (feof(fp))
       return nullptr;
-    
+
     return make_unique<char>(getc(fp));
-  }
-
-  unique_ptr<string> File::read_file() {
-    string file = string();
-
-    if (feof(fp))
-      return make_unique<string>(file);
-
-    for (char c=getc(fp); !feof(fp); c=getc(fp))
-      file.push_back(c);
-
-    return make_unique<string>(file);
-  }
-
-  unique_ptr<string> File::read_line() {
-    string line;
-
-    if (feof(fp))
-      return make_unique<string>(line);
-
-    for (char c=getc(fp); !feof(fp); c=getc(fp)) {
-      line.push_back(c);
-
-      if (c == '\n')
-        break;
-    }
-
-    return make_unique<string>(line);
   }
 
   Token::Token() {
@@ -44,7 +16,8 @@ namespace ntokenize {
   }
 
   Token::Token(lex::Token type,
-              string value, pair<size_t,size_t> start, pair<size_t,size_t> end) {
+              string value,
+              pair<size_t,size_t> start, pair<size_t,size_t> end) {
     type=type;
     value=value;
     start=start;
@@ -58,19 +31,6 @@ namespace ntokenize {
     value.clear();
   }
 
-  unique_ptr<Token> Token::from(Token* other) {
-    Token t;
-
-    t.clear();
-
-    t.type = other->type;
-    t.start = pair<size_t,size_t>(other->start);
-    t.end = pair<size_t,size_t>(other->end);
-    t.value.append(other->value);
-
-    return make_unique<Token>(t);
-  }
-
   void Token::copy(Token* other) {
     clear();
 
@@ -80,37 +40,58 @@ namespace ntokenize {
     value.append(other->value);
   }
 
-  string Token::as_string() {
-    char* format = (char*)
-      "Token "
-      "{"
-      " type: \"%s\","
-      " start: { %i, %i },"
-      " end: { %i, %i }"
-      " value: \"%s\" "
-      "}";
-    
-    string s=string();
-    s.reserve(256);
-
-    sprintf(&s[0], format,
-      lex::token_name[type].c_str(),
-      start.first,start.second,
-      end.first,end.second,
-      value.c_str()
-    );
-
-    return s;
-  }
 
   void Tokenizer::eat() {
     current.value.push_back(*curr_char);
     current.end.second++;
+    current.abs_end++;
   }
 
   void Tokenizer::step() {
     eat();
     curr_char = file.read_char();
+  }
+
+  bool Tokenizer::check(pair<char,lex::Token> x, pair<char,lex::Token> y) {
+    pair<bool,lex::Token> r = compare(*curr_char, x, y);
+    current.type = r.second;
+
+    if (r.first)
+      step();
+
+    return r.first;
+  }
+
+  bool Tokenizer::check(pair<char,lex::Token> x) {
+    auto r = compare(*curr_char, x);
+    current.type = r.second;
+
+    if (r.first)
+      step();
+
+    return r.first;
+  }
+
+  bool Tokenizer::check(char a, char b, lex::Token T) {
+    if (a <= *curr_char && *curr_char <= b) {
+      current.type = T;
+      step();
+      return true;
+    }
+
+    current.type = lex::Token::Error;
+    return false;
+  }
+
+  bool Tokenizer::check(bool (*test)(char), lex::Token T) {
+    if (test(*curr_char)) {
+      current.type = T;
+      step();
+      return true;
+    }
+
+    current.type = lex::Token::Error;
+    return false;
   }
 
   void Tokenizer::next() {
@@ -139,6 +120,7 @@ namespace ntokenize {
       }
     }
 
+    current.abs_start = current.abs_end;
     if (is_token()) {
       last.copy(&current);
       return;
@@ -148,4 +130,23 @@ namespace ntokenize {
     if (curr_char == nullptr)
       goto null_char;
   }
-}
+
+  inline pair<bool,lex::Token>
+  compare(char x, pair<char,lex::Token> a, pair<char,lex::Token> b) {
+    if (x == a.first)
+      return {true, a.second};
+
+    else if (x == b.first)
+      return {true, b.second};
+
+    return {false, lex::Token::Error};
+  }
+
+  inline pair<bool,lex::Token>
+  compare(char x, pair<char,lex::Token> y) {
+    if (x == y.first)
+      return {true, y.second};
+
+    return {false,lex::Token::Error};
+  }
+} // namespace ntokenize
