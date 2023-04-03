@@ -3,9 +3,6 @@
 namespace ntokenize {
   // '\\~|\\}|\\|=|\\||\\{|\\^=|\\^|\\]|\\[|@=|@|>>=|>>|>=|>|==|=|<=|<<=|<<|<|;|:=|:|/=|//=|//|/|\\.\\.\\.|\\.|\\->|\\-=|\\-|,|\\+=|\\+|\\*=|\\*\\*=|\\*\\*|\\*|\\)|\\(|\\&=|\\&|%=|%|!=)'
   bool Tokenizer::is_special() {
-    current.start = current.end;
-    current.type = lex::Token::Operator;
-
     if (check({'(',lex::Token::LPar}, {')',lex::Token::RPar}))
       return true;
 

@@ -8,43 +8,10 @@ namespace ntokenize {
     return make_unique<char>(getc(fp));
   }
 
-  Token::Token() {
-    type = lex::Token::Error;
-    start = pair<size_t,size_t>();
-    end = pair<size_t,size_t>();
-    value=string();
-  }
-
-  Token::Token(lex::Token type,
-              string value,
-              pair<size_t,size_t> start, pair<size_t,size_t> end) {
-    type=type;
-    value=value;
-    start=start;
-    end=end;
-  }
-
-  void Token::clear() {
-    type = lex::Token::Error;
-    start = pair<size_t,size_t>();
-    end = pair<size_t,size_t>();
-    value.clear();
-  }
-
-  void Token::copy(Token* other) {
-    clear();
-
-    type = other->type;
-    start = pair<size_t,size_t>(other->start);
-    end = pair<size_t,size_t>(other->end);
-    value.append(other->value);
-  }
-
-
   void Tokenizer::eat() {
-    current.value.push_back(*curr_char);
-    current.end.second++;
-    current.abs_end++;
+    current.value.raw.push_back(*curr_char);
+    current.pos.rel.end.y++;
+    current.pos.abs.end++;
   }
 
   void Tokenizer::step() {
@@ -95,32 +62,28 @@ namespace ntokenize {
   }
 
   void Tokenizer::next() {
-    current.clear();
-
-    if (last.type == lex::Token::NewLine) {
-      current.start.first++;
-      current.start.second = 0;
-      current.end.first++;
-      current.end.second = 0;
-    }
-
-    if (curr_char == nullptr) {
+    if (!curr_char) {
       curr_char = file.read_char();
 
-      if (curr_char == nullptr) null_char: {
+      if (!curr_char) null_char: {
         current.type = lex::Token::EndMarker;
-
-        current.start.first++;
-        current.start.second = 0;
-
-        current.end.first++;
-        current.end.second = 0;
+        current.pos.rel.start = {current.pos.rel.start.x+1, 0};
+        current.pos.rel.end = current.pos.rel.start;
 
         return;
       }
     }
 
-    current.abs_start = current.abs_end;
+    if (current.type == lex::Token::NewLine) {
+      current.clear();
+
+      current.pos.rel.start = {last.pos.rel.start.x+1, 0};
+      current.pos.rel.end = {last.pos.rel.start.x+1, 0};
+    }
+
+    current.pos.abs.start = last.pos.abs.end;
+    current.pos.rel.start = last.pos.rel.end;
+
     if (is_token()) {
       last.copy(&current);
       return;

@@ -9,9 +9,8 @@ int main(int argc, char** argv, char** environ) {
   while (true) {
     tokenize.next();
 
-    printf("%s: '%s'\n",
-      lex::token_name[tokenize.current.type].c_str(),
-      tokenize.current.value.c_str());
+    if (tokenize.current.type != lex::Token::Ignore)
+      printf("%s\n", tokenize.current.as_string().c_str());
 
     if (tokenize.current.type == lex::Token::EndMarker)
       break;

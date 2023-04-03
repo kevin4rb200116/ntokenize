@@ -1,34 +1,17 @@
 #include "common.hh"
 #include "lex.hh"
+#include "token.hh"
 
 #ifndef TokenizeHeader
 #define TokenizeHeader
 
 namespace ntokenize {
-  using namespace std;
-
   typedef struct File {
     FILE* fp;
 
     unique_ptr<char> read_char();
     File(FILE* fp) : fp(fp) {}
   } File;
-
-  typedef struct Token {
-    int16_t type;
-    size_t abs_start, abs_end;
-    pair<size_t,size_t> start, end;
-    string value;
-
-    void clear();
-    void copy(Token* other);
-    static unique_ptr<Token> from(Token* other);
-
-    Token();
-    Token(lex::Token type,
-              string value,
-              pair<size_t,size_t> start, pair<size_t,size_t> end);
-  } Token;
 
   typedef struct Tokenizer {
     File file;

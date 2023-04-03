@@ -3,12 +3,10 @@
 namespace ntokenize {
   // "[ \f\t]*"
   bool Tokenizer::is_whitespace() {
-    current.start = current.end;
-
     while (check({'\f',lex::Token::Ignore}, {'\t',lex::Token::Ignore})
            || check({' ',lex::Token::Ignore}));
 
-    if (current.value.length() == 0)
+    if (current.value.raw.length() == 0)
       return false;
 
     current.type = lex::Token::Ignore;
@@ -17,8 +15,6 @@ namespace ntokenize {
 
   // "#[^\r\n]*"
   bool Tokenizer::is_comment() {
-    current.start = current.end;
-
     if (!check({'#', lex::Token::Comment})) {
       current.type = lex::Token::Error;
       return false;
@@ -41,8 +37,6 @@ namespace ntokenize {
 
   // "\r?\n(Special)"
   bool Tokenizer::is_funny() {
-    current.start = current.end;
-
     if (is_special())
       return true;
 
@@ -57,18 +51,8 @@ namespace ntokenize {
     return false;
   }
 
-  // Whitespace|Comment?
-  bool Tokenizer::is_ignore() {
-    return is_whitespace() || is_comment();
-  }
-
   // "\w+"
   bool Tokenizer::is_name() {
-    if (current.type != lex::Token::Name)
-      current.start = current.end;
-
-    current.type = lex::Token::Name;
-
     auto is_alpha = [](char x) { return (bool) isalpha(x); };
     auto is_alnum = [](char x) { return (bool) isalnum(x); };
 
@@ -77,7 +61,7 @@ namespace ntokenize {
       while (check(is_alnum, lex::Token::Name)
              || check({'_', lex::Token::Name}));
       
-      if (current.value.length() == 0)
+      if (current.value.raw.length() == 0)
         return false;
 
       current.type = lex::Token::Name;
@@ -86,6 +70,11 @@ namespace ntokenize {
 
     current.type = lex::Token::Error;
     return false;
+  }
+
+  // Whitespace|Comment?
+  bool Tokenizer::is_ignore() {
+    return is_whitespace() || is_comment();
   }
 
   // (Funny|Number|Name|String)

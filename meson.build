@@ -6,13 +6,15 @@ incdir = include_directories('src/include')
 
 install_headers(
   'src/include/ntokenize/common.hh',
-  'src/include/ntokenize/lex.hh',
   'src/include/ntokenize/main.hh',
+  'src/include/ntokenize/token.hh',
+  'src/include/ntokenize/lex.hh',
   install_dir: 'include/ntokenize')
 
 lib = library('ntokenize',
-  'src/lib/lex.cc',
   'src/lib/main.cc',
+  'src/lib/token.cc',
+  'src/lib/lex.cc',
   'src/lib/tokens.cc',
   'src/lib/special.cc',
   'src/lib/number.cc',

@@ -3,8 +3,6 @@
 namespace ntokenize {
   // (|RB|u|Rb|Br|b|fr|r|Rf|br|fR|Fr|R|f|rb|FR|BR|rf|bR|rB|B|F|rF|RF|U)
   bool Tokenizer::is_string_prefix() {
-    current.start = current.end;
-
     if (check({'u',lex::Token::Name},{'U',lex::Token::Name}))
       return true;
     
@@ -36,9 +34,6 @@ namespace ntokenize {
 
   // '(StringPrefix*(Single|Double)
   bool Tokenizer::is_string() {
-    current.start = current.end;
-    current.type = lex::Token::String;
-
     bool with_prefix = false;
 
     if (is_string_prefix())

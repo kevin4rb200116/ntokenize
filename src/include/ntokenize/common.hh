@@ -7,7 +7,7 @@
 #include <memory>
 
 namespace ntokenize {
-  
+  using namespace std;
 } // namespace ntokenize
 
 #endif //CommonHeader
