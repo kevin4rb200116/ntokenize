@@ -1,5 +1,5 @@
 project('ntokenize', 'cpp',
-  version : '0.3',
+  version : '0.4',
   default_options : ['cpp_std=c++17'])
 
 incdir = include_directories('src/include')
@@ -20,7 +20,7 @@ lib = library('ntokenize',
   'src/lib/number.cc',
   'src/lib/string.cc',
   include_directories: incdir,
-  version: '0.3', # same as project obviously
+  version: '0.4', # same as project obviously
   install : true)
 
 bin = executable('ntokenize', 'src/main.cc',
