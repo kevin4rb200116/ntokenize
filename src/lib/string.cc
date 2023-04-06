@@ -115,7 +115,7 @@ namespace ntokenize {
       its prefix, which means we have a name.
       */
 
-      current.type = lex::Token::Name;
+      return is_name();
     }
 
     return false;

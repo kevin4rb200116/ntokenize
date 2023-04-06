@@ -74,6 +74,8 @@ namespace ntokenize {
       }
     }
 
+    current.value.clear();
+
     if (current.type == lex::Token::NewLine) {
       current.clear();
 

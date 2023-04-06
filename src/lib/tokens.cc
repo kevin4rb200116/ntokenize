@@ -60,15 +60,21 @@ namespace ntokenize {
         || check({'_', lex::Token::Name})) {
       while (check(is_alnum, lex::Token::Name)
              || check({'_', lex::Token::Name}));
-      
+
       if (current.value.raw.length() == 0)
         return false;
 
       current.type = lex::Token::Name;
       return true;
+    } else if (current.value.raw.length() != 0) {
+      for (auto c : current.value.raw)
+        if (!is_alpha(c))
+          return false;
+
+      current.type = lex::Token::Name;
+      return true;
     }
 
-    current.type = lex::Token::Error;
     return false;
   }
 
