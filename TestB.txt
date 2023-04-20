@@ -1,0 +1,8 @@
+def rec(x y) x+rec(y, 4.0); # a function definition
+def foo(x y) x+y y;         # another function definition
+def foo(x y) x+y );         # a bad function definition
+extern sin(a);              # an extern function
+def foo(a b) a*a + 2*a*b + b*b;
+def bar(a) foo(a, 4.0) + bar(31337);
+extern cos(x);
+cos(1.234);

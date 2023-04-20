@@ -26,7 +26,8 @@ namespace ntokenize {
           break;
 
         return false;
-      }
+      } else if (check({'\n',lex::Token::NewLine}))
+        break;
 
       step();
     }
